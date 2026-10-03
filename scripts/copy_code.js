@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
   const preElements = document.querySelectorAll('pre');
   preElements.forEach(pre => {
+    if (pre.closest('.answer-code-modal') || pre.classList.contains('answer-code-source')) return;
     const codeBlock = pre.querySelector('code');
     if (!codeBlock) return;
 
