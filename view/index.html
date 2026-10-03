@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>InterviewPro — теория</title>
+  <link rel="stylesheet" href="../styles/style.css">
+  <link rel="stylesheet" href="../styles/scroll_top.css">
+  <link rel="stylesheet" href="../styles/followups.css">
+</head>
+<body data-root="." data-page="all">
+  <aside class="sidebar" id="site-sidebar"></aside>
+  <div class="main-wrapper">
+    <main class="content" id="page-top">
+      <div class="hero-box">
+        <h1 class="hero-title">InterviewPro: теория</h1>
+        <p class="hero-tagline">388 основных вопросов и 335 уточнений. Выберите тему в левом меню или изучайте всю базу ниже.</p>
+      </div>
+      <div class="questions-heading-row">
+        <h2 id="questions">Все вопросы и уточнения</h2>
+        <form id="study-number-form" class="study-number-form">
+          <label for="study-number-input">Отметить по номерам</label>
+          <textarea id="study-number-input" rows="2" placeholder="1, 1.1, 2.3" aria-describedby="study-number-hint"></textarea>
+          <button type="submit" class="hero-btn hero-btn-primary">Отметить</button>
+        </form>
+      </div>
+      <p id="study-number-hint" class="study-number-hint">Введите номера через пробел, запятую или с новой строки. Например, 1 — вопрос, 1.1 — его первое уточнение.</p>
+      <p id="study-number-status" class="study-number-status" role="status" aria-live="polite"></p>
+      <p>В полном квизе и собеседовании уточнения идут за своим основным вопросом.</p>
+      <div class="summary-actions summary-actions-three">
+        <button id="start-key-quizlet-btn" class="hero-btn hero-btn-primary" type="button">🎯 Квиз по основным вопросам</button>
+        <button id="start-quizlet-btn" class="hero-btn hero-btn-primary" type="button">🧠 Квиз по всем вопросам</button>
+        <button id="start-interview-btn" class="hero-btn hero-btn-primary" type="button">🎙️ Собеседование</button>
+      </div>
+      <div class="questions-list"></div>
+    </main>
+  </div>
+  <div id="quizlet-modal-root"></div>
+  <div id="interview-modal-root"></div>
+  <a class="back-to-top" href="#page-top" aria-label="Вернуться к началу страницы">↑ Наверх</a>
+  <script src="../scripts/content/linux/processes.data.js"></script>
+  <script src="../scripts/content/linux/memory.data.js"></script>
+  <script src="../scripts/content/linux/kernel.data.js"></script>
+  <script src="../scripts/content/network/transport.data.js"></script>
+  <script src="../scripts/content/network/http.data.js"></script>
+  <script src="../scripts/content/network/kubernetes.data.js"></script>
+  <script src="../scripts/content/containers/docker.data.js"></script>
+  <script src="../scripts/content/containers/delivery.data.js"></script>
+  <script src="../scripts/content/kubernetes/architecture.data.js"></script>
+  <script src="../scripts/content/kubernetes/operations.data.js"></script>
+  <script src="../scripts/content/databases/sql.data.js"></script>
+  <script src="../scripts/content/databases/postgresql.data.js"></script>
+  <script src="../scripts/content/databases/indexes.data.js"></script>
+  <script src="../scripts/content/databases/distributed.data.js"></script>
+  <script src="../scripts/content/databases/redis.data.js"></script>
+  <script src="../scripts/content/golang/basics.data.js"></script>
+  <script src="../scripts/content/golang/concurrency.data.js"></script>
+  <script src="../scripts/content/golang/runtime.data.js"></script>
+  <script src="../scripts/content/golang/ecosystem.data.js"></script>
+  <script src="../scripts/content/architecture/services.data.js"></script>
+  <script src="../scripts/content/architecture/security.data.js"></script>
+  <script src="../scripts/content/reliability/sre.data.js"></script>
+  <script src="../scripts/content/reliability/observability.data.js"></script>
+  <script src="../scripts/content/archive_card_builder.js"></script>
+  <script src="../scripts/content/golang/language.data.js"></script>
+  <script src="../scripts/content/golang/collections_deep.data.js"></script>
+  <script src="../scripts/content/golang/types.data.js"></script>
+  <script src="../scripts/content/golang/errors.data.js"></script>
+  <script src="../scripts/content/golang/concurrency_patterns.data.js"></script>
+  <script src="../scripts/content/golang/synchronization.data.js"></script>
+  <script src="../scripts/content/golang/runtime_deep.data.js"></script>
+  <script src="../scripts/content/golang/generics.data.js"></script>
+  <script src="../scripts/content/golang/context_deep.data.js"></script>
+  <script src="../scripts/content/golang/testing.data.js"></script>
+  <script src="../scripts/content/golang/backend.data.js"></script>
+  <script src="../scripts/content/golang/design.data.js"></script>
+  <script src="../scripts/content/golang/runtime_internals.data.js"></script>
+  <script src="../scripts/content/golang/optimization.data.js"></script>
+  <script src="../scripts/content/golang/build_security.data.js"></script>
+  <script src="../scripts/content/architecture/messaging.data.js"></script>
+  <script src="../scripts/content/architecture/distributed.data.js"></script>
+  <script src="../scripts/content/architecture/service_patterns.data.js"></script>
+  <script src="../scripts/content/architecture/scenarios.data.js"></script>
+  <script src="../scripts/content/databases/querying.data.js"></script>
+  <script src="../scripts/content/databases/scaling.data.js"></script>
+  <script src="../scripts/content/algorithms/graphs.data.js"></script>
+  <script src="../scripts/content/reliability/resilience.data.js"></script>
+  <script src="../scripts/content/question_catalog.js"></script>
+  <script src="../scripts/site_runtime.js"></script>
+  <script src="../scripts/quizlet_mode.js"></script>
+  <script src="../scripts/interview_mode.js"></script>
+  <script src="../scripts/copy_code.js"></script>
+</body>
+</html>
