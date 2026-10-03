@@ -3,6 +3,15 @@
   "time_note": "В исходных точках часы не записаны; null означает неизвестное время, не 00:00.",
   "entries": [
     {
+      "id": "2026-10-04-pause",
+      "date": "2026-10-04",
+      "time": "00:15:01+04:00",
+      "title": "Пауза до завтра",
+      "report": "reports/2026-10-04_pause.md",
+      "state": "paused_by_user",
+      "failed_attempts": 0
+    },
+    {
       "id": "2026-10-03-summary-subtopic-collapse",
       "date": "2026-10-03",
       "time": null,
