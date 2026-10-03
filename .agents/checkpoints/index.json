@@ -1,0 +1,132 @@
+{
+  "schema_version": 1,
+  "time_note": "В исходных точках часы не записаны; null означает неизвестное время, не 00:00.",
+  "entries": [
+    {
+      "id": "2026-10-03-summary-subtopic-collapse",
+      "date": "2026-10-03",
+      "time": null,
+      "title": "Сворачивание подтем",
+      "report": "reports/2026-10-03_summary_subtopic_collapse.md",
+      "state": "applied_unverified",
+      "failed_attempts": 0
+    },
+    {
+      "id": "2026-10-03-answer-highlights",
+      "date": "2026-10-03",
+      "time": null,
+      "title": "Ключевые фразы",
+      "report": "reports/2026-10-03_answer_highlights.md",
+      "state": "applied_unverified",
+      "failed_attempts": 0
+    },
+    {
+      "id": "2026-10-03-answer-code-examples",
+      "date": "2026-10-03",
+      "time": null,
+      "title": "Примеры кода",
+      "report": "reports/2026-10-03_answer_code_examples.md",
+      "state": "applied_unverified",
+      "failed_attempts": null
+    },
+    {
+      "id": "2026-10-03-study-timer",
+      "date": "2026-10-03",
+      "time": null,
+      "title": "Таймер занятий",
+      "report": "reports/2026-10-03_study_timer.md",
+      "state": "applied_unverified",
+      "failed_attempts": null
+    },
+    {
+      "id": "2026-10-03-user-pause-and-git",
+      "date": "2026-10-03",
+      "time": null,
+      "title": "Пауза и Git",
+      "report": "reports/2026-10-03_user_pause_and_git.md",
+      "state": "historical",
+      "failed_attempts": null
+    },
+    {
+      "id": "2026-10-03-followup-order",
+      "date": "2026-10-03",
+      "time": null,
+      "title": "Порядок уточнений",
+      "report": "reports/2026-10-03_followup_order.md",
+      "state": "verified",
+      "failed_attempts": null
+    },
+    {
+      "id": "2026-10-03-answer-colors",
+      "date": "2026-10-03",
+      "time": null,
+      "title": "Цвета ответов",
+      "report": "reports/2026-10-03_answer_colors.md",
+      "state": "verified",
+      "failed_attempts": null
+    },
+    {
+      "id": "2026-10-03-sources-and-checkmarks",
+      "date": "2026-10-03",
+      "time": null,
+      "title": "Источники и галочки",
+      "report": "reports/2026-10-03_sources_and_checkmarks.md",
+      "state": "verified",
+      "failed_attempts": null
+    },
+    {
+      "id": "2026-10-03-question-order-and-answers",
+      "date": "2026-10-03",
+      "time": null,
+      "title": "Порядок вопросов",
+      "report": "reports/2026-10-03_question_order_and_answers.md",
+      "state": "historical",
+      "failed_attempts": null
+    },
+    {
+      "id": "2026-10-03-archive-reaudit",
+      "date": "2026-10-03",
+      "time": null,
+      "title": "Сверка архива",
+      "report": "reports/2026-10-03_archive_reaudit.md",
+      "state": "partial",
+      "failed_attempts": null
+    },
+    {
+      "id": "2026-10-03-sidebar-counts",
+      "date": "2026-10-03",
+      "time": null,
+      "title": "Счётчики меню",
+      "report": "reports/2026-10-03_sidebar_counts.md",
+      "state": "applied_unverified",
+      "failed_attempts": null
+    },
+    {
+      "id": "2026-10-03-project-state",
+      "date": "2026-10-03",
+      "time": null,
+      "title": "Состояние Theory",
+      "report": "reports/2026-10-03_project_state.md",
+      "state": "reference",
+      "failed_attempts": null
+    },
+    {
+      "id": "2026-09-28-interview-hard-stop",
+      "date": "2026-09-28",
+      "time": null,
+      "title": "STOP собеседования",
+      "report": "reports/2026-09-28_interview_hard_stop.md",
+      "state": "hard_stop",
+      "failed_attempts": 2
+    },
+    {
+      "id": "task9-hard-stop",
+      "date": null,
+      "time": null,
+      "title": "STOP Task 9",
+      "report": "reports/task9_hard_stop.md",
+      "state": "hard_stop",
+      "failed_attempts": 2
+    }
+  ]
+}
