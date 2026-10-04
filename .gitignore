@@ -17,3 +17,5 @@ __pycache__/
 .agents/memory/
 .agents/checkpoints/reports/
 .notes/
+store/data
+store/profiles.json

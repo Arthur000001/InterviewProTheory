@@ -37,6 +37,11 @@
       '</details>';
   }).join('');
   sidebar.innerHTML =
+    '<section class="sidebar-profile" aria-label="Профиль">' +
+    '<div class="sidebar-profile-row"><span class="sidebar-profile-name" id="profile-name"></span>' +
+    '<button type="button" id="profile-rename" aria-label="Переименовать профиль" title="Переименовать профиль">✎</button></div>' +
+    '<p id="profile-status" role="status" aria-live="polite"></p>' +
+    '</section>' +
     '<section class="sidebar-study-timer" aria-label="Таймер занятий">' +
     '<div class="sidebar-study-time" id="study-timer-display" role="timer">00:00</div>' +
     '<div class="sidebar-study-controls">' +
@@ -218,6 +223,207 @@
       // A local file can still be used without persistent storage.
     }
   };
+  const profileNameStorageKey = 'interviewpro-theory-profile-name-v1';
+  const validProfileName = name => /^[\p{L}\p{N}_-]{1,64}$/u.test(name);
+  let profileName = 'artur';
+  try {
+    const savedName = localStorage.getItem(profileNameStorageKey);
+    if (savedName && validProfileName(savedName)) profileName = savedName;
+  } catch (_) { /* use the default name */ }
+  const profileNameLabel = sidebar.querySelector('#profile-name');
+  profileNameLabel.textContent = profileName;
+  const stateFileName = 'state.json';
+  const loadedStorageKey = () => profileName === 'artur'
+    ? 'interviewpro-theory-artur-loaded-v1'
+    : 'interviewpro-theory-profile-loaded-' + encodeURIComponent(profileName) + '-v1';
+  const dirtyStudyStorageKey = 'interviewpro-theory-unsaved-state-v1';
+  const profileStatus = sidebar.querySelector('#profile-status');
+  const readPreference = key => {
+    try { return localStorage.getItem(key); } catch (_) { return null; }
+  };
+  const writePreference = (key, value) => {
+    try { localStorage.setItem(key, value); } catch (_) { /* unavailable */ }
+  };
+  let stateLoaded = readPreference(loadedStorageKey()) === '1';
+  let studyDirty = readPreference(dirtyStudyStorageKey) === '1' ||
+    (!stateLoaded && Object.values(studied).some(value => value === true));
+  const setStudyDirty = dirty => {
+    studyDirty = dirty;
+    writePreference(dirtyStudyStorageKey, dirty ? '1' : '0');
+  };
+  const showProfileStatus = message => { profileStatus.textContent = message; };
+  sidebar.querySelector('#profile-rename').addEventListener('click', () => {
+    const nextName = window.prompt('Новое имя профиля (буквы, цифры, _ или -):', profileName);
+    if (nextName === null) return;
+    const trimmedName = nextName.trim();
+    if (!validProfileName(trimmedName)) {
+      showProfileStatus('Имя: от 1 до 64 символов; только буквы, цифры, _ и -.');
+      return;
+    }
+    if (trimmedName === profileName) return;
+    profileName = trimmedName;
+    profileNameLabel.textContent = profileName;
+    writePreference(profileNameStorageKey, profileName);
+    stateLoaded = false;
+    if (Object.keys(studySnapshot()).length) setStudyDirty(true);
+    const loadButton = document.querySelector('.study-number-load');
+    if (loadButton) loadButton.textContent = 'Загрузить состояние ' + profileName;
+    showProfileStatus('Имя изменено. Новое сохранение: data/' + profileName + '/state.json. Старый файл сохранён.');
+  });
+  const studySnapshot = () => Object.fromEntries(
+    Object.entries(studied).filter(([, value]) => value === true));
+  const validStudyMarks = value => value && typeof value === 'object' &&
+    !Array.isArray(value) && Object.entries(value).every(([key, marked]) =>
+      /^question-\d+(?:-followup-[1-9]\d*)?$/.test(key) && marked === true);
+  let storeHandle = null;
+  const folderDatabase = () => new Promise((resolve, reject) => {
+    const request = indexedDB.open('interviewpro-theory-folder-v1', 1);
+    request.onupgradeneeded = () => request.result.createObjectStore('settings');
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+  const savedFolder = async () => {
+    const database = await folderDatabase();
+    try {
+      return await new Promise((resolve, reject) => {
+        const request = database.transaction('settings').objectStore('settings').get('store');
+        request.onsuccess = () => resolve(request.result || null);
+        request.onerror = () => reject(request.error);
+      });
+    } finally { database.close(); }
+  };
+  const rememberFolder = async handle => {
+    const database = await folderDatabase();
+    try {
+      await new Promise((resolve, reject) => {
+        const transaction = database.transaction('settings', 'readwrite');
+        transaction.objectStore('settings').put(handle, 'store');
+        transaction.oncomplete = resolve;
+        transaction.onerror = () => reject(transaction.error);
+      });
+    } finally { database.close(); }
+  };
+  const ensureStoreFolder = async () => {
+    if (typeof window.showDirectoryPicker !== 'function') {
+      throw new Error('Этот браузер не поддерживает запись в папку store.');
+    }
+    if (storeHandle) {
+      if (await storeHandle.requestPermission({ mode: 'readwrite' }) === 'granted') {
+        return storeHandle;
+      }
+      storeHandle = null;
+      throw new Error('Доступ к store не разрешён. Нажмите кнопку ещё раз, чтобы выбрать папку.');
+    }
+    const handle = await window.showDirectoryPicker({ id: 'interviewpro-store', mode: 'readwrite' });
+    if (handle.name !== 'store') {
+      throw new Error('Выберите папку InterviewProTheory/store.');
+    }
+    storeHandle = handle;
+    if (await handle.queryPermission({ mode: 'readwrite' }) !== 'granted') {
+      throw new Error('Разрешите запись в папку store и нажмите кнопку ещё раз.');
+    }
+    stateLoaded = false;
+    writePreference(loadedStorageKey(), '0');
+    try { await rememberFolder(handle); } catch (_) { /* select again after navigation */ }
+    return handle;
+  };
+  const readJsonFile = async (directory, name) => {
+    try {
+      const file = await directory.getFileHandle(name);
+      return JSON.parse(await (await file.getFile()).text());
+    } catch (cause) {
+      if (cause.name === 'NotFoundError') return null;
+      throw cause;
+    }
+  };
+  const writeJsonFile = async (directory, name, value) => {
+    const file = await directory.getFileHandle(name, { create: true });
+    const writer = await file.createWritable();
+    try {
+      await writer.write(JSON.stringify(value, null, 2) + '\n');
+      await writer.close();
+    } catch (cause) {
+      await writer.abort().catch(() => {});
+      throw cause;
+    }
+  };
+  const profileFolder = async create => {
+    try {
+      const data = await storeHandle.getDirectoryHandle('data', { create });
+      return await data.getDirectoryHandle(profileName, { create });
+    } catch (cause) {
+      if (cause.name === 'NotFoundError') return null;
+      throw cause;
+    }
+  };
+  const readProfileState = async () => {
+    const directory = await profileFolder(false);
+    const state = directory && await readJsonFile(directory, stateFileName);
+    if (!state) {
+      const cause = new Error('У ' + profileName + ' пока нет сохранённых данных.');
+      cause.code = 'no_data';
+      throw cause;
+    }
+    if (state.version !== 1 || state.profile !== profileName || !validStudyMarks(state.studied)) {
+      throw new Error('Некорректный файл data/' + profileName + '/state.json.');
+    }
+    return state;
+  };
+  const writeProfileState = async marks => {
+    const directory = await profileFolder(true);
+    await writeJsonFile(directory, stateFileName, {
+      version: 1, profile: profileName, savedAt: new Date().toISOString(), studied: marks
+    });
+  };
+  const loadProfileState = async () => {
+    if (studyDirty) {
+      showProfileStatus('Текущие отметки не сохранены. Загрузка остановлена, чтобы не потерять их.');
+      return;
+    }
+    try {
+      await ensureStoreFolder();
+      const result = await readProfileState();
+      studied = result.studied;
+      saveStudyState();
+      restoreStudyState();
+      syncAllQuestionCheckboxes();
+      updateRemainingCounts();
+      stateLoaded = true;
+      writePreference(loadedStorageKey(), '1');
+      setStudyDirty(false);
+      showProfileStatus('Состояние ' + profileName + ' загружено.');
+    } catch (cause) {
+      showProfileStatus(cause.code === 'no_data'
+        ? 'У ' + profileName + ' пока нет сохранённых данных. Текущие отметки остались в браузере.'
+        : 'Не удалось загрузить: ' + cause.message);
+    }
+  };
+  const saveCurrentProfile = async () => {
+    try {
+      await ensureStoreFolder();
+      if (!stateLoaded) {
+        try {
+          await readProfileState();
+          showProfileStatus('У ' + profileName + ' уже есть данные. Запись остановлена, чтобы не перезаписать их.');
+          return;
+        } catch (cause) {
+          if (cause.code !== 'no_data') throw cause;
+        }
+      }
+      await writeProfileState(studySnapshot());
+      stateLoaded = true;
+      writePreference(loadedStorageKey(), '1');
+      setStudyDirty(false);
+      showProfileStatus('Состояние ' + profileName + ' сохранено в data/' + profileName + '/state.json.');
+    } catch (cause) {
+      if (cause.name !== 'AbortError') showProfileStatus('Не удалось сохранить: ' + cause.message);
+    }
+  };
+  const initStudyFolder = async () => {
+    try { storeHandle = await savedFolder(); }
+    catch (_) { /* folder can still be chosen on save or load */ }
+    showProfileStatus('');
+  };
   list.addEventListener('change', event => {
     if (!event.target.matches('.question-checkbox input[type="checkbox"]')) return;
     const item = event.target.closest('.clarification-item, .question-card');
@@ -233,6 +439,7 @@
     else delete studied[item.id];
     if (item !== card) syncQuestionCheckbox(card);
     saveStudyState();
+    setStudyDirty(true);
     updateRemainingCounts();
   });
   const section = (group, topic, summary) => {
@@ -1338,8 +1545,8 @@
     const makeButtons = scope => {
       const actions = document.createElement('div');
       actions.className = 'study-export-actions';
-      actions.innerHTML = '<button type="button" class="hero-btn hero-btn-primary" data-study-export="csv">Скачать CSV: вопросы и уточнения</button>' +
-        '<button type="button" class="hero-btn hero-btn-primary" data-study-export="txt">Скачать текст зачёркнутых вопросов</button>';
+      actions.innerHTML = '<button type="button" class="hero-btn hero-btn-primary" data-study-export="xlsx">Скачать Excel: вопросы и уточнения</button>' +
+        '<button type="button" class="hero-btn hero-btn-primary" data-study-export="json">Сохранить состояние текущих вопросов в JSON</button>';
       scope.append(actions);
       return actions;
     };
@@ -1359,8 +1566,36 @@
     const form = document.getElementById('study-number-form');
     const input = document.getElementById('study-number-input');
     const status = document.getElementById('study-number-status');
+    const hint = document.getElementById('study-number-hint');
     const copyButton = document.getElementById('copy-studied-numbers');
-    if (!form || !input || !status || !copyButton) return;
+    const heading = document.querySelector('.questions-heading-row');
+    if (!form || !input || !status || !hint || !copyButton || !heading) return;
+    const dialog = document.createElement('dialog');
+    dialog.className = 'study-number-dialog';
+    dialog.setAttribute('aria-label', 'Отметить вопросы по номерам');
+    const title = document.createElement('h2');
+    title.textContent = 'Отметить по номерам';
+    const closeButton = document.createElement('button');
+    closeButton.type = 'button';
+    closeButton.className = 'study-number-close';
+    closeButton.textContent = 'Закрыть';
+    const loadButton = document.createElement('button');
+    loadButton.type = 'button';
+    loadButton.className = 'hero-btn hero-btn-primary study-number-load';
+    loadButton.textContent = 'Загрузить состояние ' + profileName;
+    loadButton.addEventListener('click', loadProfileState);
+    dialog.append(title, form, hint, status, loadButton, closeButton);
+    document.body.append(dialog);
+    const openButton = document.createElement('button');
+    openButton.type = 'button';
+    openButton.className = 'hero-btn hero-btn-primary';
+    openButton.textContent = 'Отметить по номерам';
+    heading.append(openButton);
+    openButton.addEventListener('click', () => dialog.showModal());
+    closeButton.addEventListener('click', () => dialog.close());
+    dialog.addEventListener('click', event => {
+      if (event.target === dialog) dialog.close();
+    });
     const checkboxes = new Map();
     list.querySelectorAll('.question-card').forEach(card => {
       const number = card.querySelector('.main-question .question-text > strong')?.textContent.replace(/\D/g, '');
@@ -1423,6 +1658,7 @@
       }
       if (marked) {
         saveStudyState();
+        setStudyDirty(true);
         updateRemainingCounts();
       }
       status.textContent = 'Отмечено: ' + marked +
@@ -1457,8 +1693,111 @@
       }, 2000);
     });
   };
-  const downloadStudyFile = (name, content, type) => {
-    const address = URL.createObjectURL(new Blob([content], { type }));
+  const xmlText = value => String(value)
+    .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '')
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&apos;');
+  const worksheetXml = rows => '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+    '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetData>' +
+    rows.map((row, rowIndex) => '<row r="' + (rowIndex + 1) + '">' +
+      row.map((value, columnIndex) => '<c r="' + String.fromCharCode(65 + columnIndex) +
+        (rowIndex + 1) + '" t="inlineStr"><is><t xml:space="preserve">' +
+        xmlText(value) + '</t></is></c>').join('') + '</row>').join('') +
+    '</sheetData></worksheet>';
+  const crcTable = Array.from({ length: 256 }, (_, number) => {
+    let crc = number;
+    for (let bit = 0; bit < 8; bit++) crc = (crc >>> 1) ^ ((crc & 1) ? 0xEDB88320 : 0);
+    return crc >>> 0;
+  });
+  const zipWorkbook = files => {
+    const encoder = new TextEncoder();
+    const chunks = [];
+    const directory = [];
+    let offset = 0;
+    const put = (view, position, value, size) => {
+      if (size === 2) view.setUint16(position, value, true);
+      else view.setUint32(position, value, true);
+    };
+    files.forEach(([name, contents]) => {
+      const nameBytes = encoder.encode(name);
+      const data = encoder.encode(contents);
+      let crc = 0xFFFFFFFF;
+      data.forEach(byte => { crc = (crc >>> 8) ^ crcTable[(crc ^ byte) & 0xFF]; });
+      crc = (crc ^ 0xFFFFFFFF) >>> 0;
+      const local = new Uint8Array(30 + nameBytes.length);
+      const localView = new DataView(local.buffer);
+      put(localView, 0, 0x04034B50, 4);
+      put(localView, 4, 20, 2);
+      put(localView, 6, 0x0800, 2);
+      put(localView, 14, crc, 4);
+      put(localView, 18, data.length, 4);
+      put(localView, 22, data.length, 4);
+      put(localView, 26, nameBytes.length, 2);
+      local.set(nameBytes, 30);
+      chunks.push(local, data);
+      const central = new Uint8Array(46 + nameBytes.length);
+      const centralView = new DataView(central.buffer);
+      put(centralView, 0, 0x02014B50, 4);
+      put(centralView, 4, 20, 2);
+      put(centralView, 6, 20, 2);
+      put(centralView, 8, 0x0800, 2);
+      put(centralView, 16, crc, 4);
+      put(centralView, 20, data.length, 4);
+      put(centralView, 24, data.length, 4);
+      put(centralView, 28, nameBytes.length, 2);
+      put(centralView, 42, offset, 4);
+      central.set(nameBytes, 46);
+      directory.push(central);
+      offset += local.length + data.length;
+    });
+    const directorySize = directory.reduce((size, entry) => size + entry.length, 0);
+    const ending = new Uint8Array(22);
+    const endingView = new DataView(ending.buffer);
+    put(endingView, 0, 0x06054B50, 4);
+    put(endingView, 8, files.length, 2);
+    put(endingView, 10, files.length, 2);
+    put(endingView, 12, directorySize, 4);
+    put(endingView, 16, offset, 4);
+    return new Blob([...chunks, ...directory, ending], {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    });
+  };
+  const workbookBlob = (questions, clarifications) => {
+    const ns = 'http://schemas.openxmlformats.org/officeDocument/2006/relationships';
+    return zipWorkbook([
+      ['[Content_Types].xml', '<?xml version="1.0" encoding="UTF-8"?>' +
+        '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">' +
+        '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>' +
+        '<Default Extension="xml" ContentType="application/xml"/>' +
+        '<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>' +
+        '<Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>' +
+        '<Override PartName="/xl/worksheets/sheet2.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>' +
+        '</Types>'],
+      ['_rels/.rels', '<?xml version="1.0" encoding="UTF-8"?>' +
+        '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
+        '<Relationship Id="rId1" Type="' + ns + '/officeDocument" Target="xl/workbook.xml"/>' +
+        '</Relationships>'],
+      ['xl/workbook.xml', '<?xml version="1.0" encoding="UTF-8"?>' +
+        '<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="' + ns + '">' +
+        '<sheets><sheet name="Вопросы" sheetId="1" r:id="rId1"/>' +
+        '<sheet name="Уточнения" sheetId="2" r:id="rId2"/></sheets></workbook>'],
+      ['xl/_rels/workbook.xml.rels', '<?xml version="1.0" encoding="UTF-8"?>' +
+        '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
+        '<Relationship Id="rId1" Type="' + ns + '/worksheet" Target="worksheets/sheet1.xml"/>' +
+        '<Relationship Id="rId2" Type="' + ns + '/worksheet" Target="worksheets/sheet2.xml"/>' +
+        '</Relationships>'],
+      ['xl/worksheets/sheet1.xml', worksheetXml([
+        ['Вопрос', 'Статус'], ...questions.map(row =>
+          [row[1], row[2] ? 'Ответили' : 'Не ответили'])
+      ])],
+      ['xl/worksheets/sheet2.xml', worksheetXml([
+        ['Номер вопроса', 'Уточнение', 'Статус'], ...clarifications.map(row =>
+          [row[0], row[1], row[2] ? 'Ответили' : 'Не ответили'])
+      ])]
+    ]);
+  };
+  const downloadWorkbook = (name, blob) => {
+    const address = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = address;
     link.download = name;
@@ -1467,9 +1806,6 @@
     link.remove();
     window.setTimeout(() => URL.revokeObjectURL(address), 1000);
   };
-  const csvContent = (headers, rows) => '\uFEFF' + [headers, ...rows]
-    .map(row => row.map(value => '"' + String(value).replace(/"/g, '""') + '"').join(';'))
-    .join('\r\n');
   list.addEventListener('click', event => {
     const button = event.target.closest('[data-study-export]');
     if (!button) return;
@@ -1477,17 +1813,10 @@
     const scope = section || list;
     const fileBase = section ? section.id.replace(/^topic-/, '') : 'all-questions';
     const { questions, clarifications } = collectStudyRows(scope);
-    if (button.dataset.studyExport === 'csv') {
-      downloadStudyFile(fileBase + '-questions.csv',
-        csvContent(['Номер вопроса', 'Вопрос', 'Изучено'], questions), 'text/csv;charset=utf-8');
-      downloadStudyFile(fileBase + '-clarifications.csv',
-        csvContent(['Номер вопроса', 'Уточнение', 'Изучено'], clarifications), 'text/csv;charset=utf-8');
-    } else if (button.dataset.studyExport === 'txt') {
-      const completed = questions.filter(row => row[2]);
-      const text = completed.length
-        ? completed.map(row => row[0] + '. ' + row[1]).join('\n\n')
-        : 'Изученных вопросов пока нет.';
-      downloadStudyFile(fileBase + '-studied.txt', text, 'text/plain;charset=utf-8');
+    if (button.dataset.studyExport === 'xlsx') {
+      downloadWorkbook(fileBase + '.xlsx', workbookBlob(questions, clarifications));
+    } else if (button.dataset.studyExport === 'json') {
+      saveCurrentProfile();
     }
   });
 
@@ -1512,6 +1841,7 @@
     setupNumberControls();
     setupSubtopicCollapses();
     scrollToHash();
+    initStudyFolder();
     return;
   }
 
@@ -1540,4 +1870,5 @@
   addAdditionalSources();
   addStudyExportButtons();
   scrollToHash();
+  initStudyFolder();
 })();
