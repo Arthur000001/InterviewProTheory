@@ -12,21 +12,6 @@ import _ "net/http/pprof"
 </details>
 
 </article>
-<article class="question-card" id="question-130">
-<label class="checklist-item main-question"><input type="checkbox"><span class="question-text"><strong>130.</strong> Как устроен и зачем нужен пакет context в Go? Как передавать отмену и таймауты при работе с HTTP/gRPC и Kubernetes API?</span></label>
-<details class="answer-details"><summary>Показать ответ</summary>
-<div class="answer-box">
-          <p><strong>Суть:</strong> <code>context.Context</code> передает сигналы отмены, дедлайны и метаданные вдоль дерева вызовов горутин.</p>
-<pre><code class="language-go">ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
-defer cancel()
-
-req, _ := http.NewRequestWithContext(ctx, "GET", "https://k8s-api", nil)
-resp, err := http.DefaultClient.Do(req)
-// Если запрос зависнет дольше 2 сек, HTTP-клиент разорвет сокет</code></pre>
-        </div>
-</details>
-
-</article>
 <article class="question-card" id="question-131">
 <label class="checklist-item main-question"><input type="checkbox"><span class="question-text"><strong>131.</strong> Чем небуферизованный канал отличается от буферизованного, и что произойдет при чтении/записи/закрытии nil канала или уже закрытого канала?</span></label>
 <details class="answer-details"><summary>Показать ответ</summary>

@@ -133,54 +133,6 @@ window.InterviewProContent["databases/sql"] = `<article class="question-card" id
 </div>
 </div>
 </article>
-<article class="question-card" id="question-100">
-<label class="checklist-item main-question"><input type="checkbox"><span class="question-text"><strong>100.</strong> Может ли табличный CHECK сравнивать несколько столбцов?</span></label>
-<details class="answer-details"><summary>Показать ответ</summary>
-<div class="answer-box">
-          
-          <p>Да: табличное ограничение CHECK (price &gt;= cost) проверяет значения нескольких столбцов одной строки. Оно не предназначено для проверки других строк или другой таблицы; для таких инвариантов нужны иные механизмы. Условие с NULL может вернуть UNKNOWN, что не считается нарушением.</p>
-        
-        </div>
-</details>
-<div class="clarifications" aria-label="Уточнения к вопросу"><h3>Уточнения <small>(2)</small></h3>
-<div class="clarification-item" id="question-100-followup-1" data-parent-question="question-100">
-<label class="checklist-item clarification-question"><input type="checkbox"><span class="question-text">↳ Что такое значение NULL?</span></label>
-<details class="answer-details"><summary>Показать ответ</summary>
-<div class="answer-box"><p style="white-space: pre-wrap;">NULL обозначает отсутствующее или неизвестное значение, а не указатель, ноль или пустую строку. Сравнения через = с NULL не дают true; используйте IS NULL и IS NOT NULL. В арифметике с NULL результат обычно тоже NULL.</p></div>
-</details>
-</div>
-<div class="clarification-item" id="question-100-followup-2" data-parent-question="question-100">
-<label class="checklist-item clarification-question"><input type="checkbox"><span class="question-text">↳ Что вернёт следующий запрос?</span></label>
-<details class="answer-details"><summary>Показать ответ</summary>
-<div class="answer-box"><p style="white-space: pre-wrap;">Если b=5, а c содержит NULL, выражение b - c вернёт NULL. Запрос SELECT b - c AS delta вернёт строку с delta=NULL, если вставка прошла.</p></div>
-</details>
-</div>
-</div>
-</article>
-<article class="question-card" id="question-101">
-<label class="checklist-item main-question"><input type="checkbox"><span class="question-text"><strong>101.</strong> Как NULL влияет на сравнения и агрегаты в SQL?</span></label>
-<details class="answer-details"><summary>Показать ответ</summary>
-<div class="answer-box">
-          
-          <p>NULL обозначает неизвестное или отсутствующее значение. Сравнение через = или &lt;&gt; с NULL даёт UNKNOWN; используют IS NULL и IS NOT NULL. COUNT(*) считает строки, а COUNT(column) пропускает строки с NULL в указанном столбце.</p>
-        
-        </div>
-</details>
-<div class="clarifications" aria-label="Уточнения к вопросу"><h3>Уточнения <small>(2)</small></h3>
-<div class="clarification-item" id="question-101-followup-1" data-parent-question="question-101">
-<label class="checklist-item clarification-question"><input type="checkbox"><span class="question-text">↳ Почему и как исправить?</span></label>
-<details class="answer-details"><summary>Показать ответ</summary>
-<div class="answer-box"><p style="white-space: pre-wrap;">Причина — распространение NULL через арифметику и сравнение. Если по смыслу отсутствие c можно считать нулём, используйте COALESCE(c, 0); иначе явно обрабатывайте строки с c IS NULL.</p></div>
-</details>
-</div>
-<div class="clarification-item" id="question-101-followup-2" data-parent-question="question-101">
-<label class="checklist-item clarification-question"><input type="checkbox"><span class="question-text">↳ Что произойдёт, когда память закончится?</span></label>
-<details class="answer-details"><summary>Показать ответ</summary>
-<div class="answer-box"><p style="white-space: pre-wrap;">Если памяти для запроса или БД не хватает, запрос может завершиться ошибкой, начать интенсивно использовать временные файлы или вызвать OOM Killer на уровне ОС. Причину ищут по плану, лимитам, журналам и метрикам.</p></div>
-</details>
-</div>
-</div>
-</article>
 <article class="question-card" id="question-102">
 <label class="checklist-item main-question"><input type="checkbox"><span class="question-text"><strong>102.</strong> Как ORDER BY сортирует по нескольким полям?</span></label>
 <details class="answer-details"><summary>Показать ответ</summary>
@@ -190,54 +142,6 @@ window.InterviewProContent["databases/sql"] = `<article class="question-card" id
         </div>
 </details>
 
-</article>
-<article class="question-card" id="question-103">
-<label class="checklist-item main-question"><input type="checkbox"><span class="question-text"><strong>103.</strong> Почему большая пагинация через OFFSET замедляется?</span></label>
-<details class="answer-details"><summary>Показать ответ</summary>
-<div class="answer-box">
-          
-          <p>OFFSET заставляет сервер найти и пропустить предшествующие строки; чем глубже страница, тем больше работы. При стабильном порядке можно использовать keyset pagination: WHERE (created_at, id) &lt; (:last_created_at, :last_id) с подходящим индексом. Без ORDER BY страницы не имеют гарантированного порядка.</p>
-        
-        </div>
-</details>
-<div class="clarifications" aria-label="Уточнения к вопросу"><h3>Уточнения <small>(2)</small></h3>
-<div class="clarification-item" id="question-103-followup-1" data-parent-question="question-103">
-<label class="checklist-item clarification-question"><input type="checkbox"><span class="question-text">↳ Почему пагинация через OFFSET неэффективна на больших данных?</span></label>
-<details class="answer-details"><summary>Показать ответ</summary>
-<div class="answer-box"><p style="white-space: pre-wrap;">Большой OFFSET требует пройти и отбросить предыдущие строки; индекс не делает глубокий пропуск бесплатным. При изменении данных между страницами возможны повторы и пропуски.</p></div>
-</details>
-</div>
-<div class="clarification-item" id="question-103-followup-2" data-parent-question="question-103">
-<label class="checklist-item clarification-question"><input type="checkbox"><span class="question-text">↳ Как можно оптимизировать пагинацию (keyset pagination)?</span></label>
-<details class="answer-details"><summary>Показать ответ</summary>
-<div class="answer-box"><p style="white-space: pre-wrap;">Задайте полный порядок по индексируемым столбцам и храните последний ключ предыдущей страницы. Следующие строки запрашивайте условием по этому ключу, например (created_at, id) &lt; (:time, :id) при сортировке DESC.</p></div>
-</details>
-</div>
-</div>
-</article>
-<article class="question-card" id="question-110">
-<label class="checklist-item main-question"><input type="checkbox"><span class="question-text"><strong>110.</strong> Чем TRUNCATE отличается от DELETE в PostgreSQL?</span></label>
-<details class="answer-details"><summary>Показать ответ</summary>
-<div class="answer-box">
-          
-          <p>TRUNCATE быстро очищает таблицу целиком и берёт сильную блокировку; DELETE может выбирать строки через WHERE и создаёт обычные версии строк для MVCC. В PostgreSQL TRUNCATE транзакционен: ROLLBACK возвращает данные. У команд разные правила для триггеров, внешних ключей и последовательностей.</p>
-        
-        </div>
-</details>
-<div class="clarifications" aria-label="Уточнения к вопросу"><h3>Уточнения <small>(2)</small></h3>
-<div class="clarification-item" id="question-110-followup-1" data-parent-question="question-110">
-<label class="checklist-item clarification-question"><input type="checkbox"><span class="question-text">↳ Почему TRUNCATE нельзя откатить в транзакции?</span></label>
-<details class="answer-details"><summary>Показать ответ</summary>
-<div class="answer-box"><p style="white-space: pre-wrap;">Предпосылка неверна для PostgreSQL: TRUNCATE внутри транзакции можно откатить через ROLLBACK. Но он берёт сильную блокировку и не является MVCC-безопасным для старых снимков.</p></div>
-</details>
-</div>
-<div class="clarification-item" id="question-110-followup-2" data-parent-question="question-110">
-<label class="checklist-item clarification-question"><input type="checkbox"><span class="question-text">↳ Как безопасно очистить таблицу с зависимыми FK?</span></label>
-<details class="answer-details"><summary>Показать ответ</summary>
-<div class="answer-box"><p style="white-space: pre-wrap;">Проверьте зависимые FK и точный набор таблиц. Для полного очищения согласованных таблиц выполните TRUNCATE всех нужных таблиц в транзакции; CASCADE используйте только после просмотра зависимостей.</p></div>
-</details>
-</div>
-</div>
 </article>
 <article class="question-card" id="question-111">
 <label class="checklist-item main-question"><input type="checkbox"><span class="question-text"><strong>111.</strong> Когда использовать DELETE вместо TRUNCATE?</span></label>

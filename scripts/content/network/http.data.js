@@ -1,18 +1,5 @@
 window.InterviewProContent = window.InterviewProContent || Object.create(null);
-window.InterviewProContent["network/http"] = `<article class="question-card" id="question-40">
-<label class="checklist-item main-question"><input type="checkbox"><span class="question-text"><strong>40.</strong> В чем разница между кодами ошибок 502 Bad Gateway и 504 Gateway Timeout на Ingress/Nginx? Как их диагностировать?</span></label>
-<details class="answer-details"><summary>Показать ответ</summary>
-<div class="answer-box">
-          <p><strong>Суть:</strong></p>
-<ul>
-  <li><strong>502 Bad Gateway:</strong> бэкенд мгновенно отбил соединение (Connection refused, падение по OOM, процесс упал или закрыл сокет до ответа). Смотреть логи и restart count подов.</li>
-  <li><strong>504 Gateway Timeout:</strong> бэкенд принял соединение, но не ответил за отведенное время (таймаут <code>proxy_read_timeout</code>). Причина: долгий SQL-запрос, дедлок, зависание внешнего API.</li>
-</ul>
-        </div>
-</details>
-
-</article>
-<article class="question-card" id="question-44">
+window.InterviewProContent["network/http"] = `<article class="question-card" id="question-44">
 <label class="checklist-item main-question"><input type="checkbox"><span class="question-text" style="flex: 1 1 auto; min-width: 0; word-break: break-word; line-height: 1.5;"><strong>44.</strong> В чем разница между proxy / reverse-proxy?</span></label>
 <details class="answer-details"><summary>Показать ответ</summary>
 <div class="answer-box">
@@ -54,26 +41,6 @@ window.InterviewProContent["network/http"] = `<article class="question-card" id=
 </div>
 </div>
 </article>
-<article class="question-card" id="question-46">
-<label class="checklist-item main-question"><input type="checkbox"><span class="question-text"><strong>46.</strong> Чем HTTP/3 и QUIC отличаются от HTTP/2 поверх TCP?</span></label>
-<details class="answer-details"><summary>Показать ответ</summary>
-<div class="answer-box">
-          
-          <p>HTTP/3 переносит HTTP-семантику по QUIC поверх UDP. QUIC предоставляет надёжные независимые потоки и TLS 1.3; потеря пакета задерживает затронутый поток, а не все потоки TCP-соединения. Это может сократить задержки, но результат зависит от сети и реализации.</p>
-        </div>
-</details>
-
-</article>
-<article class="question-card" id="question-47">
-<label class="checklist-item main-question"><input type="checkbox"><span class="question-text"><strong>47.</strong> Когда статические файлы стоит отдавать с отдельного домена?</span></label>
-<details class="answer-details"><summary>Показать ответ</summary>
-<div class="answer-box">
-          
-          <p>Отдельный домен может отделить политику кеширования и не отправлять прикладные cookie с запросами за статикой. Но дополнительное соединение и DNS-запрос тоже стоят времени; HTTP/2 и HTTP/3 уменьшают прежнюю выгоду от разнесения доменов. Решение проверяют на реальном трафике, а не принимают автоматически.</p>
-        </div>
-</details>
-
-</article>
 <article class="question-card" id="question-48">
 <label class="checklist-item main-question"><input type="checkbox"><span class="question-text"><strong>48.</strong> Чем HTTP/1.1 отличается от HTTP/2?</span></label>
 <details class="answer-details"><summary>Показать ответ</summary>
@@ -84,13 +51,4 @@ window.InterviewProContent["network/http"] = `<article class="question-card" id=
 </details>
 
 </article>
-<article class="question-card" id="question-49">
-<label class="checklist-item main-question"><input type="checkbox"><span class="question-text"><strong>49.</strong> Что означают HTTP-ответы 100 Continue и 301 Moved Permanently?</span></label>
-<details class="answer-details"><summary>Показать ответ</summary>
-<div class="answer-box">
-          
-          <p>100 Continue — промежуточный ответ: клиент может продолжить отправку тела запроса после проверки заголовков сервером. 301 Moved Permanently сообщает о постоянном переносе ресурса; новый адрес обычно передаётся в Location. Для метода и тела при перенаправлении есть нюансы поведения клиентов, поэтому нельзя считать 301 простым повтором любого запроса.</p>
-        </div>
-</details>
-
-</article>`;
+`;
