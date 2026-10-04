@@ -1,8 +1,17 @@
 {
   "schema_version": 1,
-  "latest_id": "2026-10-04-task2-stop-correction",
+  "latest_id": "2026-10-04-new-questions",
   "time_note": "В исходных точках часы не записаны; null означает неизвестное время, не 00:00.",
   "entries": [
+    {
+      "id": "2026-10-04-new-questions",
+      "date": "2026-10-04",
+      "time": "14:41:03Z",
+      "title": "Разбор new.md и добавление уникальных вопросов",
+      "report": "reports/2026-10-04_new_questions.md",
+      "state": "verified",
+      "failed_attempts": 0
+    },
     {
       "id": "2026-10-04-task2-stop-correction",
       "date": "2026-10-04",

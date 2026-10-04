@@ -1,29 +1,5 @@
 window.InterviewProContent["golang/types"] = window.InterviewProBuildCards("golang/types", [
   {
-    "id": 249,
-    "title": "Главная ловушка: nil-интерфейс ≠ интерфейс с nil-значением",
-    "answer": "```go\ntype MyErr struct{}\nfunc (*MyErr) Error() string { return \"boom\" }\n\nfunc do() error {\n    var e *MyErr = nil\n    return e // интерфейс {type: *MyErr, value: nil}\n}\n\nfmt.Println(do() == nil) // false!\n```\nИнтерфейс равен `nil`, только если **и тип, и значение** nil. Правило: возвращайте `nil` явно, а не типизированный nil-указатель.",
-    "markdown": true
-  },
-  {
-    "id": 250,
-    "title": "Неявная реализация интерфейсов — плюсы и минусы",
-    "answer": "Тип реализует интерфейс автоматически, если имеет все методы (duck typing на этапе компиляции). Плюсы: нет зависимости от пакета с интерфейсом, легко мокать. Идиома: **«Accept interfaces, return structs»**, интерфейсы объявляются на стороне **потребителя** и маленькие (`io.Reader` — 1 метод).\n\nПроверка на этапе компиляции: `var _ Storage = (*PgStorage)(nil)`.",
-    "markdown": true
-  },
-  {
-    "id": 251,
-    "title": "Value receiver vs pointer receiver",
-    "answer": "| | Value `func (t T)` | Pointer `func (t *T)` |\n|---|---|---|\n| Меняет исходный объект | нет (копия) | да |\n| Копирование | всей структуры | 8 байт |\n| Method set `T` | ✔ | ✘ |\n| Method set `*T` | ✔ | ✔ |\n\nСледствие: если метод объявлен на `*T`, то **значение** `T` не реализует интерфейс:\n```go\ntype S struct{}\nfunc (*S) M() {}\nvar _ I = S{}  // ошибка компиляции\nvar _ I = &S{} // ок\n```\nПравило: если хоть один метод на указателе (или есть мьютекс внутри) — делайте все на указателе.",
-    "markdown": true
-  },
-  {
-    "id": 252,
-    "title": "Встраивание (embedding) — это наследование?",
-    "answer": "Нет, это **композиция с продвижением методов**. Встроенный тип не знает о внешнем — нет виртуальных вызовов:\n```go\ntype Base struct{}\nfunc (Base) Name() string   { return \"base\" }\nfunc (b Base) Hello() string { return \"hi \" + b.Name() }\n\ntype Child struct{ Base }\nfunc (Child) Name() string { return \"child\" }\n\nChild{}.Hello() // \"hi base\" — не \"hi child\"!\n```\nВстраивание интерфейса в структуру — приём для частичных моков и декораторов.",
-    "markdown": true
-  },
-  {
     "id": 253,
     "title": "Можно ли сравнивать структуры?",
     "answer": "`==` работает, если все поля comparable. Структура со слайсом/map — ошибка компиляции. Интерфейсы с несравнимым значением внутри — **panic в рантайме**. Для глубокого сравнения в тестах — `reflect.DeepEqual` или `github.com/google/go-cmp`.",
@@ -33,18 +9,6 @@ window.InterviewProContent["golang/types"] = window.InterviewProBuildCards("gola
     "id": 254,
     "title": "Пустая структура struct{} — зачем?",
     "answer": "Занимает 0 байт (все такие значения могут иметь один адрес `runtime.zerobase`). Применения: множества `map[K]struct{}`, сигнальные каналы `chan struct{}`, типы-маркеры с методами.",
-    "markdown": true
-  },
-  {
-    "id": 255,
-    "title": "Выравнивание полей (alignment/padding)",
-    "answer": "```go\ntype Bad struct {  // 24 байта\n    a bool   // 1 + 7 padding\n    b int64  // 8\n    c bool   // 1 + 7 padding\n}\ntype Good struct { // 16 байт\n    b int64\n    a, c bool\n}\n```\nПроверка: `unsafe.Sizeof`, линтер `fieldalignment`. Важно для горячих структур и 64-битных атомиков на 32-битных платформах (используйте `atomic.Int64` — он выровнен).",
-    "markdown": true
-  },
-  {
-    "id": 256,
-    "title": "Теги структур",
-    "answer": "Метаданные для рефлексии: `json:\"name,omitempty\"`, `db:\"id\"`, `validate:\"required\"`. Читаются через `reflect.StructTag.Get`. В Go 1.24 появилась опция `omitzero` в `encoding/json` — пропускает zero value (в т.ч. `time.Time{}`) и учитывает метод `IsZero()`. В `encoding/json/v2` (Go 1.27) — ещё строже и быстрее.",
     "markdown": true
   },
   {
@@ -60,15 +24,42 @@ window.InterviewProContent["golang/types"] = window.InterviewProBuildCards("gola
     "markdown": true
   },
   {
-    "id": 259,
-    "title": "Функциональные опции (functional options)",
-    "answer": "```go\ntype Option func(*Server)\nfunc WithTimeout(d time.Duration) Option { return func(s *Server) { s.timeout = d } }\nfunc NewServer(addr string, opts ...Option) *Server {\n    s := &Server{addr: addr, timeout: 30 * time.Second}\n    for _, o := range opts { o(s) }\n    return s\n}\n```\nСпрашивают как пример идиоматичного API в Go.",
-    "markdown": true
-  },
-  {
     "id": 260,
     "title": "Когда интерфейс вызывает аллокацию?",
     "answer": "При присваивании в интерфейс значение, не помещающееся в указатель (или чей адрес «убегает»), копируется в кучу. Маленькие целые (0–255) и нулевые значения рантайм берёт из статических таблиц. Проверяйте: `go build -gcflags=-m`.",
+    "markdown": true
+  }
+]);
+
+window.InterviewProContent["golang/types"] += window.InterviewProBuildCards("golang/types", [
+  {
+    "id": 441,
+    "title": "Как выбрать между value receiver и pointer receiver? Как выбор влияет на изменение состояния и копирование структуры?",
+    "answer": "**Ответ:** Value receiver получает копию значения: подходит небольшим типам без изменяемого состояния. Pointer receiver позволяет менять исходный объект и избегать копирования большой структуры. Типы с mutex нельзя копировать после начала использования.\n\nКопирование структуры **поверхностное**: её slice/map могут продолжать ссылаться на общие данные. Сам по себе pointer receiver не обеспечивает потокобезопасность. Обычно методы одного типа используют согласованный стиль receiver.",
+    "markdown": true
+  },
+  {
+    "id": 442,
+    "title": "Какие методы входят в method set типов T и *T? Почему вызов метода у переменной ещё не доказывает, что её тип реализует интерфейс?",
+    "answer": "**Ответ:** Для обычного именованного типа `T` набор методов содержит методы с receiver `T`, а для `*T` — с receiver `T` и `*T`. У адресуемой переменной компилятор может автоматически взять адрес при вызове метода; при присваивании интерфейсу такого преобразования нет.\n\n```go\ntype Counter struct{ N int }\nfunc (c *Counter) Inc() { c.N++ }\ntype Incrementer interface{ Inc() }\n\nvar c Counter\nc.Inc()                    // (&c).Inc()\nvar _ Incrementer = &c     // корректно\n// var _ Incrementer = c  // Counter не реализует интерфейс\n```",
+    "markdown": true
+  },
+  {
+    "id": 443,
+    "title": "Что такое embedding полей и интерфейсов? Как продвигаются методы и разрешаются конфликты имён?",
+    "answer": "**Ответ:** Embedding — включение типа как поля без отдельного имени либо включение интерфейса в другой интерфейс. Поля и методы вложенного типа могут быть доступны через внешний объект. Это композиция: receiver продвинутого метода остаётся вложенным объектом.\n\n```go\ntype User struct{ Name string }\ntype Admin struct{ User }\n// admin.Name эквивалентно admin.User.Name\n```\n\nБолее близкое объявление скрывает вложенное; одинаковые имена на одной глубине дают неоднозначность. У интерфейсов одноимённые методы должны иметь одинаковые сигнатуры. Встраивание `T` и `*T` по-разному влияет на method set.",
+    "markdown": true
+  },
+  {
+    "id": 444,
+    "title": "Можно ли вызвать метод у nil-указателя и при каких действиях внутри метода возникнет panic?",
+    "answer": "**Ответ:** Метод с pointer receiver можно вызвать у nil-указателя: nil передаётся как receiver. Panic возникает, если метод разыменует его, например прочитает поле, без проверки.\n\n```go\nfunc (u *User) DisplayName() string {\n    if u == nil { return \"anonymous\" }\n    return u.Name\n}\n```\n\nВызов метода с value receiver через nil `*T` требует разыменования и паникует ещё до выполнения тела метода.",
+    "markdown": true
+  },
+  {
+    "id": 445,
+    "title": "Чем method value отличается от method expression? Когда сохраняется receiver?",
+    "answer": "**Ответ:** Method value `f := x.M` вычисляет и сохраняет receiver при создании `f`; затем вызывается как `f(args)`. Для value receiver сохраняется копия значения, для pointer receiver — указатель на тот же объект.\n\nMethod expression `f := T.M` или `f := (*T).M` не привязывает объект: receiver становится первым явным аргументом — `f(x, args)`. Например, `(*Counter).Inc(&c)` вызывает метод для переданного счётчика.",
     "markdown": true
   }
 ]);

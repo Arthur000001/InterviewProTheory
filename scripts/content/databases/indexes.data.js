@@ -35,42 +35,6 @@ window.InterviewProContent["databases/indexes"] = `<article class="question-card
 </div>
 </div>
 </article>
-<article class="question-card" id="question-96">
-<label class="checklist-item main-question"><input type="checkbox"><span class="question-text"><strong>96.</strong> Есть ли в PostgreSQL постоянно поддерживаемый кластерный индекс?</span></label>
-<details class="answer-details"><summary>Показать ответ</summary>
-<div class="answer-box">
-          
-          <p>Команда CLUSTER физически переписывает таблицу по выбранному индексу в момент выполнения. Последующие вставки и обновления не поддерживают этот порядок автоматически, поэтому первичный ключ в PostgreSQL не является постоянно кластерным индексом. Для проверки выгоды учитывают паттерн запросов и стоимость переписывания.</p>
-        
-        </div>
-</details>
-<div class="clarifications" aria-label="Уточнения к вопросу"><h3>Уточнения <small>(4)</small></h3>
-<div class="clarification-item" id="question-96-followup-1" data-parent-question="question-96">
-<label class="checklist-item clarification-question"><input type="checkbox"><span class="question-text">↳ Как сортировка влияет на индекс?</span></label>
-<details class="answer-details"><summary>Показать ответ</summary>
-<div class="answer-box"><p style="white-space: pre-wrap;">Индекс может вернуть строки уже в нужном порядке, если его ключи и направления совместимы с ORDER BY и фильтрами. Иначе БД выполняет явную сортировку; при большой доле таблицы сканирование плюс сортировка может быть дешевле индексного обхода.</p></div>
-</details>
-</div>
-<div class="clarification-item" id="question-96-followup-2" data-parent-question="question-96">
-<label class="checklist-item clarification-question"><input type="checkbox"><span class="question-text">↳ Можно ли сортировать по вычисляемому выражению?</span></label>
-<details class="answer-details"><summary>Показать ответ</summary>
-<div class="answer-box"><p style="white-space: pre-wrap;">Да, ORDER BY принимает выражение или псевдоним вычисленного столбца. Для частого запроса может помочь индекс по выражению, если выражение в запросе совпадает с индексным и планировщик считает его выгодным.</p></div>
-</details>
-</div>
-<div class="clarification-item" id="question-96-followup-3" data-parent-question="question-96">
-<label class="checklist-item clarification-question"><input type="checkbox"><span class="question-text">↳ Что быстрее: сортировка в БД или в коде приложения?</span></label>
-<details class="answer-details"><summary>Показать ответ</summary>
-<div class="answer-box"><p style="white-space: pre-wrap;">Универсального ответа нет. Сортировка в БД часто лучше с LIMIT и индексом, потому что не нужно передавать все строки приложению; в приложении она уместна для уже загруженного небольшого набора. Сравнивайте полный путь по времени и памяти.</p></div>
-</details>
-</div>
-<div class="clarification-item" id="question-96-followup-4" data-parent-question="question-96">
-<label class="checklist-item clarification-question"><input type="checkbox"><span class="question-text">↳ Что делает COLLATE в ORDER BY?</span></label>
-<details class="answer-details"><summary>Показать ответ</summary>
-<div class="answer-box"><p style="white-space: pre-wrap;">COLLATE задаёт правила сравнения строк, включая локаль и порядок символов, для выражения ORDER BY. Другой collation может изменить результат и помешать использованию индекса с несовместимым collation.</p></div>
-</details>
-</div>
-</div>
-</article>
 <article class="question-card" id="question-97">
 <label class="checklist-item main-question"><input type="checkbox"><span class="question-text"><strong>97.</strong> Чем EXPLAIN ANALYZE отличается от EXPLAIN?</span></label>
 <details class="answer-details"><summary>Показать ответ</summary>
@@ -143,30 +107,6 @@ window.InterviewProContent["databases/indexes"] = `<article class="question-card
 </div>
 </div>
 </article>
-<article class="question-card" id="question-106">
-<label class="checklist-item main-question"><input type="checkbox"><span class="question-text"><strong>106.</strong> Что делает CLUSTER и почему его эффект не постоянен?</span></label>
-<details class="answer-details"><summary>Показать ответ</summary>
-<div class="answer-box">
-          
-          <p>CLUSTER переписывает таблицу в порядке индекса, что может улучшить локальность чтения диапазонов. Операция требует блокировки и места для новой копии; последующие изменения строк постепенно нарушают физический порядок. Индекс для будущего повторного запуска запоминается, но автоматической перекластеризации нет.</p>
-        
-        </div>
-</details>
-<div class="clarifications" aria-label="Уточнения к вопросу"><h3>Уточнения <small>(2)</small></h3>
-<div class="clarification-item" id="question-106-followup-1" data-parent-question="question-106">
-<label class="checklist-item clarification-question"><input type="checkbox"><span class="question-text">↳ Чем CLUSTER отличается от VACUUM FULL?</span></label>
-<details class="answer-details"><summary>Показать ответ</summary>
-<div class="answer-box"><p style="white-space: pre-wrap;">CLUSTER физически переупорядочивает таблицу по индексу; порядок затем постепенно нарушается. VACUUM FULL переписывает таблицу для возврата места ОС, но не задаёт порядок по индексу; обе операции требуют серьёзной блокировки.</p></div>
-</details>
-</div>
-<div class="clarification-item" id="question-106-followup-2" data-parent-question="question-106">
-<label class="checklist-item clarification-question"><input type="checkbox"><span class="question-text">↳ Когда целесообразно применять CLUSTER в продакшене?</span></label>
-<details class="answer-details"><summary>Показать ответ</summary>
-<div class="answer-box"><p style="white-space: pre-wrap;">CLUSTER имеет смысл, если диапазонные чтения выигрывают от близости строк и можно запланировать блокировку, место и перепись таблицы. На нагруженном проде сначала измеряют пользу и рассматривают альтернативы.</p></div>
-</details>
-</div>
-</div>
-</article>
 <article class="question-card" id="question-107">
 <label class="checklist-item main-question"><input type="checkbox"><span class="question-text"><strong>107.</strong> Какие риски у ALTER TABLE на большой таблице?</span></label>
 <details class="answer-details"><summary>Показать ответ</summary>
@@ -215,27 +155,34 @@ window.InterviewProContent["databases/indexes"] = `<article class="question-card
 </div>
 </div>
 </article>
-<article class="question-card" id="question-109">
-<label class="checklist-item main-question"><input type="checkbox"><span class="question-text"><strong>109.</strong> Что учитывают при DROP INDEX CONCURRENTLY?</span></label>
-<details class="answer-details"><summary>Показать ответ</summary>
-<div class="answer-box">
-          
-          <p>Команда удаляет индекс без длительного блокирования записей в таблицу, но не работает внутри блока транзакции и имеет ограничения для некоторых индексов. Сначала проверяют, что индекс не поддерживает нужное ограничение и не используется важными планами запросов. Изменение плана после удаления оценивают на реальной нагрузке.</p>
-        
-        </div>
-</details>
-<div class="clarifications" aria-label="Уточнения к вопросу"><h3>Уточнения <small>(2)</small></h3>
-<div class="clarification-item" id="question-109-followup-1" data-parent-question="question-109">
-<label class="checklist-item clarification-question"><input type="checkbox"><span class="question-text">↳ Почему важно использовать CONCURRENTLY при удалении?</span></label>
-<details class="answer-details"><summary>Показать ответ</summary>
-<div class="answer-box"><p style="white-space: pre-wrap;">DROP INDEX CONCURRENTLY удаляет индекс без длительной блокировки обычной работы с таблицей. Операция дольше обычной и не выполняется внутри стандартного блока транзакции.</p></div>
-</details>
-</div>
-<div class="clarification-item" id="question-109-followup-2" data-parent-question="question-109">
-<label class="checklist-item clarification-question"><input type="checkbox"><span class="question-text">↳ Что произойдёт, если индекс используется запросами?</span></label>
-<details class="answer-details"><summary>Показать ответ</summary>
-<div class="answer-box"><p style="white-space: pre-wrap;">После удаления планировщик не сможет использовать этот индекс; новые запросы могут стать медленнее. Команда согласует удаление с активными операциями через блокировки и ожидание, поэтому сначала оцените критичные планы.</p></div>
-</details>
-</div>
-</div>
-</article>`;
+`;
+
+window.InterviewProContent["databases/indexes"] += window.InterviewProBuildCards("databases/indexes", [
+  {
+    "id": 427,
+    "title": "Что такое частичный индекс в PostgreSQL и чем он отличается от префиксного индекса MySQL?",
+    "answer": "**Частичный индекс** хранит записи только для строк, удовлетворяющих предикату. Он полезен, когда запросы часто обращаются к небольшой части таблицы, например к активным заказам.\n\n```sql\n-- PostgreSQL\nCREATE INDEX idx_open_orders ON orders (created_at)\nWHERE status = 'open';\n\nSELECT * FROM orders\nWHERE status = 'open'\nORDER BY created_at;\n```\n\nПланировщик должен доказать, что условие запроса подразумевает предикат индекса. Параметризованный или иначе записанный фильтр не всегда позволяет это сделать. Индекс занимает меньше места, но изменения подходящих строк и переходы через границу предиката всё равно требуют его обслуживания.\n\nВ **MySQL 8.4** нет прямого CREATE INDEX ... WHERE. Префиксный индекс `CREATE INDEX idx_name ON users (name(20));` индексирует начало значения строки, а не подмножество строк. Индексируемый generated column может помочь для отдельного запроса, но не является полным аналогом частичного индекса.",
+    "markdown": true
+  }
+]);
+
+window.InterviewProContent["databases/indexes"] += window.InterviewProBuildCards("databases/indexes", [
+  {
+    "id": 491,
+    "title": "Как устроен B-tree индекс и какие операции он ускоряет? Для каких запросов вместо него подходят GIN, GiST или BRIN?",
+    "answer": "**Ответ:** B-tree — сбалансированная структура упорядоченных ключей: подходит равенству, диапазонам и сортировке при подходящем порядке индекса. GIN индексирует компоненты составных значений, например элементы массивов или лексемы. GiST — расширяемая структура для пространственных и других специализированных операторов. BRIN хранит сводки диапазонов страниц и полезен на больших таблицах с корреляцией значений и физического порядка.\n\nТип выбирают по операторам и нагрузке: специализированный индекс не является универсально более быстрым. [Типы индексов](https://www.postgresql.org/docs/current/indexes-types.html).",
+    "markdown": true
+  },
+  {
+    "id": 492,
+    "title": "Чем Index Scan, Bitmap Heap Scan и Index Only Scan отличаются по работе с таблицей? Как INCLUDE и visibility map влияют на возможность избежать чтения heap?",
+    "answer": "**Ответ:** Index Scan находит указатели в индексе и обращается к строкам heap. Bitmap Heap Scan сначала собирает bitmap подходящих адресов, затем читает страницы таблицы более сгруппированно. Index Only Scan может взять все необходимые значения из индекса.\n\n`INCLUDE` добавляет полезные столбцы без включения их в ключ поиска. Но для проверки MVCC-видимости чтение heap всё ещё нужно, если visibility map не отмечает страницу как all-visible. Поэтому название Index Only Scan не гарантирует нулевое число heap fetches. [Index-only scans](https://www.postgresql.org/docs/current/indexes-index-only-scans.html).",
+    "markdown": true
+  },
+  {
+    "id": 493,
+    "title": "Когда нужен индекс по выражению? Почему условие с функцией или приведением типа может не использовать ожидаемый индекс?",
+    "answer": "**Ответ:** Индекс по выражению хранит результат вычисления, например `CREATE INDEX ON users (lower(email))`, и подходит запросам с согласованным выражением. PostgreSQL требует immutable-функции в индексируемом выражении.\n\nОбычный индекс по `email` не обязательно поможет условию `lower(email) = ...`; аналогично приведение типа может изменить применимый оператор. Иногда лучше преобразовать параметр, а не столбец. Совпадение выражения ещё не заставляет планировщик выбрать индекс: учитываются селективность, статистика и цена доступа.",
+    "markdown": true
+  }
+]);

@@ -14,32 +14,6 @@ $ kubectl api-resources --verbs=list --namespaced -o name | xargs -n 1 kubectl g
 </details>
 
 </article>
-<article class="question-card" id="question-69">
-<label class="checklist-item main-question"><input type="checkbox"><span class="question-text"><strong>69.</strong> Как проверить права пользователя на действия в кластере, несмотря на RoleBinding?</span></label>
-<details class="answer-details"><summary>Показать ответ</summary>
-<div class="answer-box">
-          <p><strong>Ответ:</strong> С помощью команды <strong><code>kubectl auth can-i</code></strong> (использует API-ресурс <code>SelfSubjectAccessReview</code>).</p>
-<pre><code class="language-bash">$ kubectl auth can-i create deployments --namespace=prod
-# Проверка прав другого пользователя/сервисаккаунта от лица админа:
-$ kubectl auth can-i delete pods --as=developer --namespace=dev</code></pre>
-        </div>
-</details>
-
-</article>
-<article class="question-card" id="question-70">
-<label class="checklist-item main-question"><input type="checkbox"><span class="question-text"><strong>70.</strong> В чем разница между StartupProbe, LivenessProbe и ReadinessProbe? Что произойдет, если зафейлится Readiness, а что — если Liveness?</span></label>
-<details class="answer-details"><summary>Показать ответ</summary>
-<div class="answer-box">
-          <p><strong>Разница:</strong></p>
-<ul>
-  <li><strong>StartupProbe:</strong> дает время тяжелым сервисам прогреться. Пока она не прошла, Liveness и Readiness не опрашиваются.</li>
-  <li><strong>ReadinessProbe:</strong> проверяет готовность принимать трафик. При падении <strong>под исключается из Endpoints</strong> (трафик не идет), но контейнер <strong>НЕ перезапускается</strong>.</li>
-  <li><strong>LivenessProbe:</strong> проверяет живость процесса. При падении kubelet <strong>принудительно перезапускает контейнер</strong>.</li>
-</ul>
-        </div>
-</details>
-
-</article>
 <article class="question-card" id="question-72">
 <label class="checklist-item main-question"><input type="checkbox"><span class="question-text"><strong>72.</strong> Как происходит Graceful Shutdown пода при обновлении Deployment (RollingUpdate)? Какова роль preStop hook, SIGTERM и задержки удаления из Endpoints?</span></label>
 <details class="answer-details"><summary>Показать ответ</summary>
@@ -54,74 +28,6 @@ $ kubectl auth can-i delete pods --as=developer --namespace=dev</code></pre>
 </details>
 
 </article>
-<article class="question-card" id="question-73">
-<label class="checklist-item main-question"><input type="checkbox"><span class="question-text"><strong>73.</strong> Под завис в статусе CrashLoopBackOff, OOMKilled или Pending. Как по шагам диагностировать причину для каждого статуса?</span></label>
-<details class="answer-details"><summary>Показать ответ</summary>
-<div class="answer-box">
-          <p><strong>Диагностика:</strong></p>
-<ul>
-  <li><strong>Pending:</strong> <code>kubectl describe pod &lt;name&gt;</code> -> блок Events. Смотреть причину от Scheduler (нехватка CPU/RAM, Taints, нет свободного PVC).</li>
-  <li><strong>CrashLoopBackOff:</strong> <code>kubectl logs &lt;name&gt; --previous</code> (покажет лог перед падением) и <code>describe pod</code> (код выхода Exit Code).</li>
-  <li><strong>OOMKilled:</strong> в <code>kubectl describe pod</code> статус <code>Last State: Terminated, Reason: OOMKilled, Exit Code: 137</code>. Процесс превысил память <code>limits.memory</code>.</li>
-</ul>
-        </div>
-</details>
-
-</article>
-<article class="question-card" id="question-75">
-<label class="checklist-item main-question"><input type="checkbox"><span class="question-text"><strong>75.</strong> В чем разница между Resource Requests и Limits в Kubernetes, и как они транслируются в cgroups (cpu.shares, cfs_quota, memory.limit)?</span></label>
-<details class="answer-details"><summary>Показать ответ</summary>
-<div class="answer-box">
-          <p><strong>Трансляция в cgroups:</strong></p>
-<ul>
-  <li><code>requests.cpu</code> -> <code>cpu.shares</code> (вес процесса при конкуренции за CPU). Планировщик использует requests для поиска ноды.</li>
-  <li><code>limits.cpu</code> -> <code>cpu.cfs_quota_us</code> / <code>cpu.max</code> (жесткое ограничение процессорного времени, приводит к троттлингу).</li>
-  <li><code>requests.memory</code> -> гарантия памяти при планировании.</li>
-  <li><code>limits.memory</code> -> <code>memory.limit_in_bytes</code> / <code>memory.max</code>. При превышении ядро сразу вызывает OOM Killer.</li>
-</ul>
-        </div>
-</details>
-
-</article>
-<article class="question-card" id="question-76">
-<label class="checklist-item main-question"><input type="checkbox"><span class="question-text"><strong>76.</strong> Нода Kubernetes перешла в статус NotReady. Каков пошаговый алгоритм диагностики на самой ноде и через kube-apiserver?</span></label>
-<details class="answer-details"><summary>Показать ответ</summary>
-<div class="answer-box">
-          <p><strong>Алгоритм:</strong></p>
-<ol>
-  <li>Снаружи: <code>kubectl describe node &lt;node-name&gt;</code> (проверить флаги DiskPressure, MemoryPressure, PIDPressure, условия Ready).</li>
-  <li>На самой ноде: проверить демон kubelet: <code>systemctl status kubelet</code> и логи <code>journalctl -u kubelet -e --no-pager</code>.</li>
-  <li>Проверить рантайм: <code>systemctl status containerd</code>.</li>
-  <li>Проверить свободное место на диске (<code>df -h</code>, <code>df -i</code>) и память (<code>free -m</code>).</li>
-</ol>
-        </div>
-</details>
-
-</article>
-<article class="question-card" id="question-77">
-<label class="checklist-item main-question"><input type="checkbox"><span class="question-text"><strong>77.</strong> Как безопасно управлять секретами в Kubernetes при использовании GitOps (Vault, External Secrets Operator, SOPS, Sealed Secrets)?</span></label>
-<details class="answer-details"><summary>Показать ответ</summary>
-<div class="answer-box">
-          <p><strong>Подходы:</strong> В Git нельзя коммитить открытый base64. Используют:</p>
-<ul>
-  <li><strong>External Secrets Operator (ESO):</strong> K8s-оператор, забирающий секреты из HashiCorp Vault / AWS Secrets Manager и создающий Secret в кластере.</li>
-  <li><strong>Mozilla SOPS:</strong> шифрует значения в yaml PGP-ключом или через KMS (AWS/GCP/Yandex). Зашифрованный файл безопасно лежит в Git.</li>
-  <li><strong>Sealed Secrets (Bitnami):</strong> шифрование асимметричным ключом кластера.</li>
-</ul>
-        </div>
-</details>
-
-</article>
-<article class="question-card" id="question-78">
-<label class="checklist-item main-question"><input type="checkbox"><span class="question-text"><strong>78.</strong> Как работают Horizontal Pod Autoscaler (HPA) и Vertical Pod Autoscaler (VPA), и почему их опасно использовать одновременно по метрике CPU/Memory?</span></label>
-<details class="answer-details"><summary>Показать ответ</summary>
-<div class="answer-box">
-          <p><strong>Суть:</strong> HPA меняет количество реплик по нагрузке. VPA меняет Requests/Limits существующего пода (перезапуская его).</p>
-<p><strong>Опасность:</strong> Если оба настроены на одну метрику (CPU), возникнет гонка: при всплеске нагрузки HPA добавит подов, а VPA параллельно начнет их рестартовать с большими ресурсами, вызвав шторм рестартов и деградацию сервиса.</p>
-        </div>
-</details>
-
-</article>
 <article class="question-card" id="question-79">
 <label class="checklist-item main-question"><input type="checkbox"><span class="question-text"><strong>79.</strong> Что такое Finalizers в Kubernetes и как они могут заблокировать удаление ресурсов?</span></label>
 <details class="answer-details"><summary>Показать ответ</summary>
@@ -132,3 +38,36 @@ $ kubectl auth can-i delete pods --as=developer --namespace=dev</code></pre>
 </details>
 
 </article>`;
+
+window.InterviewProContent["kubernetes/operations"] += window.InterviewProBuildCards("kubernetes/operations", [
+  {
+    "id": 471,
+    "title": "Чем Job отличается от CronJob? Как работают повторы, ограничение времени выполнения и concurrencyPolicy?",
+    "answer": "**Ответ:** Job запускает работу до заданного успешного завершения; CronJob создаёт Job по расписанию. `backoffLimit` ограничивает повторы, `activeDeadlineSeconds` — время работы Job; `parallelism` и `completions` задают параллелизм и число успешных выполнений.\n\nУ CronJob `concurrencyPolicy` задаёт `Allow`, `Forbid` или `Replace` для его собственных запусков. Возможны повторные и пропущенные запуски, поэтому побочные эффекты делают идемпотентными. Ограничение конкуренции одного CronJob не является глобальной блокировкой. [Jobs](https://kubernetes.io/docs/concepts/workloads/controllers/job/).",
+    "markdown": true
+  },
+  {
+    "id": 472,
+    "title": "Для чего нужны init containers и sidecar-контейнеры? Как их жизненный цикл связан с основным приложением?",
+    "answer": "**Ответ:** Обычные init containers последовательно выполняют подготовку и должны успешно завершиться до запуска основных контейнеров. Sidecar работает рядом с приложением: прокси, агент или сборщик данных.\n\nВстроенный sidecar задают в `initContainers` с `restartPolicy: Always`: после его старта могут запускаться следующие контейнеры, а при завершении Pod он останавливается после основных. Такой sidecar не мешает завершению Job. Исторический sidecar в обычном `containers` не обладает всеми этими гарантиями. [Sidecar containers](https://kubernetes.io/docs/concepts/workloads/pods/sidecar-containers/).",
+    "markdown": true
+  },
+  {
+    "id": 478,
+    "title": "Чем ConfigMap отличается от Secret? Как передавать их через переменные окружения и файлы, и когда приложение увидит обновление?",
+    "answer": "**Ответ:** ConfigMap хранит несекретную конфигурацию, Secret — чувствительные значения. Base64 в Secret — кодирование, не шифрование: нужны RBAC и настройка защиты хранения.\n\nПеременные окружения получают значения при запуске контейнера; для обновления нужен его перезапуск. Проецируемые файлы обычно обновляются с задержкой, но приложение должно перечитать их; монтирование через `subPath` автоматическое обновление не получает. Ротация файла сама по себе не обновляет уже созданный клиент БД. [Secrets](https://kubernetes.io/docs/concepts/configuration/secret/).",
+    "markdown": true
+  },
+  {
+    "id": 481,
+    "title": "Как связаны PV, PVC, StorageClass и CSI? Чем постоянное хранилище отличается от emptyDir и что происходит с данными после удаления Pod или PVC?",
+    "answer": "**Ответ:** PVC — запрос приложения на хранилище, PV — ресурс тома, StorageClass — класс и параметры выделения, CSI — интерфейс драйвера для работы с системой хранения. PVC связывается с PV, часто созданным динамически.\n\n`emptyDir` существует в рамках Pod и переживает перезапуск контейнера, но удаляется вместе с Pod. Постоянный том может пережить Pod; удаление PVC запускает дальнейший жизненный цикл согласно reclaim policy (`Retain`/`Delete`) и защите используемых ресурсов. Для StatefulSet учитывают также политику удержания PVC. [Persistent Volumes](https://kubernetes.io/docs/concepts/storage/persistent-volumes/).",
+    "markdown": true
+  },
+  {
+    "id": 482,
+    "title": "Зачем Pod нужен ServiceAccount? Чем Role/RoleBinding отличаются от ClusterRole/ClusterRoleBinding и как ограничить доступ приложения к Kubernetes API?",
+    "answer": "**Ответ:** ServiceAccount задаёт identity workload при обращении к Kubernetes API. Role описывает разрешения в namespace; ClusterRole может описывать кластерные разрешения и переиспользоваться в namespace. RoleBinding выдаёт права в своём namespace, ClusterRoleBinding — на уровне кластера.\n\nПриложению выделяют отдельный ServiceAccount и только нужные verbs/resources; избегают wildcard и `cluster-admin`. Если доступ к API не нужен, отключают автоматическое монтирование токена. Наличие ServiceAccount не даёт прав на бизнес-объекты приложения.",
+    "markdown": true
+  }
+]);

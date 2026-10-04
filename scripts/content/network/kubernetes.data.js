@@ -1,36 +1,5 @@
 window.InterviewProContent = window.InterviewProContent || Object.create(null);
-window.InterviewProContent["network/kubernetes"] = `<article class="question-card" id="question-29">
-<label class="checklist-item main-question"><input type="checkbox"><span class="question-text"><strong>29.</strong> Жизнь сетевого пакета в Kubernetes (Life of a Packet): как проходит запрос от внешнего клиента через DNS, Ingress, Service ClusterIP, iptables/eBPF до сетевого неймспейса пода и обратно?</span></label>
-<details class="answer-details"><summary>Показать ответ</summary>
-<div class="answer-box">
-          <p><strong>Суть сквозного пути пакета:</strong></p>
-<ol>
-  <li><strong>Вход:</strong> Клиент шлет запрос на внешний IP (LoadBalancer/BGP). Трафик приходит на ноду.</li>
-  <li><strong>Ingress Controller:</strong> Nginx/Envoy терминирует TLS, смотрит Host/Path и резолвит имя бэкенда через CoreDNS.</li>
-  <li><strong>Service (ClusterIP):</strong> У ClusterIP нет сетевого интерфейса. Ядро (iptables DNAT или Cilium eBPF) на выходе перехватывает пакет и подменяет IP назначения на реальный Pod IP из Endpoints.</li>
-  <li><strong>Межнодовая доставка:</strong> Пакет инкапсулируется в VXLAN/Geneve (оверлей со сниженным MTU) либо летит напрямую по BGP-маршруту.</li>
-  <li><strong>Под:</strong> Пакет попадает через <code>veth-пару</code> в сетевой namespace пода, читается рантаймом Go через epoll и обрабатывается горутиной.</li>
-</ol>
-        </div>
-</details>
-
-</article>
-<article class="question-card" id="question-35">
-<label class="checklist-item main-question"><input type="checkbox"><span class="question-text"><strong>35.</strong> Что происходит по шагам, когда сервис внутри Kubernetes делает запрос к other-service.default.svc.cluster.local?</span></label>
-<details class="answer-details"><summary>Показать ответ</summary>
-<div class="answer-box">
-          <p><strong>Шаги:</strong></p>
-<ol>
-  <li>Клиент запрашивает DNS у CoreDNS (10.96.0.10) и получает виртуальный ClusterIP (например, 10.96.15.20).</li>
-  <li>Клиент отправляет TCP SYN на этот IP.</li>
-  <li>Сетевой стек ноды перехватывает пакет (iptables DNAT или eBPF в Cilium) и подменяет ClusterIP на IP конкретного пода (например, 10.244.2.14).</li>
-  <li>Пакет уходит в интерфейс CNI и доставляется целевому поду.</li>
-</ol>
-        </div>
-</details>
-
-</article>
-<article class="question-card" id="question-38">
+window.InterviewProContent["network/kubernetes"] = `<article class="question-card" id="question-38">
 <label class="checklist-item main-question"><input type="checkbox"><span class="question-text"><strong>38.</strong> В чем разница между реализациями сетевого прокси в Kubernetes: iptables vs IPVS vs eBPF (Cilium)?</span></label>
 <details class="answer-details"><summary>Показать ответ</summary>
 <div class="answer-box">
@@ -56,3 +25,36 @@ api.stripe.com.svc.cluster.local -> api.stripe.com.cluster.local -> api.stripe.c
 </details>
 
 </article>`;
+
+window.InterviewProContent["network/kubernetes"] += window.InterviewProBuildCards("network/kubernetes", [
+  {
+    "id": 475,
+    "title": "Зачем нужен Service и как он выбирает Pod через selector и EndpointSlice? Чем отличаются port, targetPort и nodePort?",
+    "answer": "**Ответ:** Service предоставляет стабильную точку обращения к меняющемуся набору Pod. Для Service с selector контроллер формирует EndpointSlice с адресами и состоянием endpoints; сетевой dataplane направляет трафик к подходящим адресам.\n\n`port` — порт Service, `targetPort` — порт приложения в Pod, `nodePort` — выделенный порт на нодах для соответствующего типа Service. `targetPort` может ссылаться на именованный порт контейнера. Selector не проверяет, действительно ли приложение слушает нужный порт. [Service](https://kubernetes.io/docs/concepts/services-networking/service/).",
+    "markdown": true
+  },
+  {
+    "id": 476,
+    "title": "Когда использовать ClusterIP, NodePort, LoadBalancer или headless Service? Как сервис обнаруживается через DNS?",
+    "answer": "**Ответ:** ClusterIP даёт виртуальный адрес внутри кластера. NodePort публикует сервис через порт ноды. LoadBalancer запрашивает внешнюю балансировку у доступной реализации. Headless (`clusterIP: None`) не выделяет виртуальный IP и позволяет обнаруживать отдельные endpoints.\n\nDNS-имя обычно имеет вид `service.namespace.svc.<cluster-domain>`: для обычного Service оно указывает на ClusterIP, для headless — на адреса endpoints по правилам публикации. Внешний балансировщик требует поддержки окружения, а не возникает только от записи `type`. [Service](https://kubernetes.io/docs/concepts/services-networking/service/).",
+    "markdown": true
+  },
+  {
+    "id": 477,
+    "title": "Чем Service отличается от Ingress и Gateway API? Зачем нужны соответствующие контроллеры и где завершается TLS?",
+    "answer": "**Ответ:** Service в основном предоставляет доступ к набору endpoints на транспортном уровне. Ingress описывает HTTP(S)-маршрутизацию по host/path. Gateway API разделяет инфраструктурный gateway и маршруты, поддерживая более выразимые политики и роли.\n\nДля реализации правил нужен контроллер: сами API-объекты трафик не проксируют. TLS может завершаться на внешнем балансировщике/gateway либо проходить до backend — это определяется настройкой и поддержкой реализации. После TLS termination соединение к приложению настраивают отдельно.",
+    "markdown": true
+  },
+  {
+    "id": 479,
+    "title": "Как проверить путь запроса от внешнего клиента до Go-приложения, если Pod работает, но Service не отвечает? Как влияют неверный selector, порт и привязка приложения к 127.0.0.1?",
+    "answer": "**Ответ:** Проверяют цепочку: внешний балансировщик → маршрут Ingress/Gateway → Service → EndpointSlice → IP и порт Pod → приложение. Сначала проверяют наличие готовых endpoints, selector и `targetPort`, затем доступность Pod из другого Pod и сетевые политики.\n\n```bash\nkubectl get svc,endpointslices,pods -n app\nkubectl describe svc api -n app\nkubectl logs deployment/api -n app\n```\n\nGo-сервер на `127.0.0.1:8080` принимает соединения только внутри сетевого пространства Pod. Для обращения через Pod IP обычно слушают `:8080`. Running не означает Ready.",
+    "markdown": true
+  },
+  {
+    "id": 480,
+    "title": "Как работают NetworkPolicy для входящего и исходящего трафика? Как разрешить только обращения к БД и DNS и от чего зависит применение политики?",
+    "answer": "**Ответ:** NetworkPolicy выбирает Pod и разрешает ingress/egress по источникам, назначениям и портам. Если Pod изолирован для направления, разрешения нескольких политик складываются; для соединения должны быть разрешены исходящий трафик источника и входящий трафик получателя, если они изолированы.\n\nОбычно начинают с default deny и разрешают БД по нужным selectors/порту, а DNS — к реальному resolver по UDP/TCP 53. Политики исполняет поддерживающая их сетевая реализация. Стандартная NetworkPolicy не фильтрует произвольные URL или HTTP-пути. [NetworkPolicy](https://kubernetes.io/docs/concepts/services-networking/network-policies/).",
+    "markdown": true
+  }
+]);

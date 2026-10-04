@@ -1,49 +1,47 @@
 window.InterviewProContent = window.InterviewProContent || Object.create(null);
-window.InterviewProContent["architecture/security"] = `<article class="question-card" id="question-182">
-<label class="checklist-item main-question"><input type="checkbox"><span class="question-text"><strong>182.</strong> Как хранить пароли так, чтобы усложнить перебор?</span></label>
-<details class="answer-details"><summary>Показать ответ</summary>
-<div class="answer-box">
-          
-          <p>Для каждого пароля используют уникальную случайную соль и специальную медленную функцию, например Argon2id, scrypt или bcrypt, с параметрами по возможностям системы. Соль можно хранить рядом с хешем; её задача — сделать одинаковые пароли разными и исключить готовые таблицы. Обычный быстрый hash(password + salt) недостаточен.</p>
-        
-        </div>
-</details>
-<div class="clarifications" aria-label="Уточнения к вопросу"><h3>Уточнения <small>(2)</small></h3>
-<div class="clarification-item" id="question-182-followup-1" data-parent-question="question-182">
-<label class="checklist-item clarification-question"><input type="checkbox"><span class="question-text">↳ Почему нельзя хранить соль отдельно от пароля?</span></label>
-<details class="answer-details"><summary>Показать ответ</summary>
-<div class="answer-box"><p style="white-space: pre-wrap;">Соль можно хранить рядом с хешем пароля: она не обязана быть секретной. Важно создавать уникальную случайную соль для каждого пароля и хранить параметры алгоритма, чтобы проверка могла повторить вычисление. Секретным должен оставаться сам пароль; дополнительный pepper, если используется, хранят отдельно.</p></div>
-</details>
-</div>
-<div class="clarification-item" id="question-182-followup-2" data-parent-question="question-182">
-<label class="checklist-item clarification-question"><input type="checkbox"><span class="question-text">↳ Чем отличаются bcrypt, scrypt и argon2?</span></label>
-<details class="answer-details"><summary>Показать ответ</summary>
-<div class="answer-box"><p style="white-space: pre-wrap;">bcrypt использует адаптивную стоимость вычисления и ограничивает длину входа; scrypt специально требует существенной памяти и вычислений; Argon2id также настраивает память, время и параллелизм и сочетает защиту от разных способов перебора. Во всех случаях нужны уникальная соль и подбор параметров по допустимой задержке сервиса.</p></div>
-</details>
-</div>
-</div>
-</article>
-<article class="question-card" id="question-183">
-<label class="checklist-item main-question"><input type="checkbox"><span class="question-text"><strong>183.</strong> Когда нужно сравнение за постоянное время?</span></label>
-<details class="answer-details"><summary>Показать ответ</summary>
-<div class="answer-box">
-          
-          <p>При сравнении секретов, например токенов или MAC, время ответа не должно зависеть от позиции первого несовпадающего байта. В Go для подходящих байтовых последовательностей используют crypto/subtle.ConstantTimeCompare. Нужно также продумать проверку длины и другие ветви обработки, иначе общий ответ всё равно может утекать по времени.</p>
-        
-        </div>
-</details>
-<div class="clarifications" aria-label="Уточнения к вопросу"><h3>Уточнения <small>(2)</small></h3>
-<div class="clarification-item" id="question-183-followup-1" data-parent-question="question-183">
-<label class="checklist-item clarification-question"><input type="checkbox"><span class="question-text">↳ Почему обычное сравнение может быть небезопасным?</span></label>
-<details class="answer-details"><summary>Показать ответ</summary>
-<div class="answer-box"><p style="white-space: pre-wrap;">Обычное сравнение может завершаться на первом несовпавшем байте, поэтому время выполнения зависит от длины общего префикса. При доступном злоумышленнику точном измерении это создаёт побочный канал для секретов, например MAC или токена. Для секретных значений используют сравнение с постоянным временем и не раскрывают детали ошибок.</p></div>
-</details>
-</div>
-<div class="clarification-item" id="question-183-followup-2" data-parent-question="question-183">
-<label class="checklist-item clarification-question"><input type="checkbox"><span class="question-text">↳ Как ConstantTimeCompare предотвращает тайминговые атаки?</span></label>
-<details class="answer-details"><summary>Показать ответ</summary>
-<div class="answer-box"><p style="white-space: pre-wrap;">crypto/subtle.ConstantTimeCompare сравнивает байты одинаковой длины без раннего выхода при первом несовпадении и возвращает 1 при равенстве. При различной длине функция возвращает 0 сразу, поэтому выбор длины и остальная логика проверки тоже должны учитывать утечки времени. Одна функция не делает весь протокол автоматически безопасным.</p></div>
-</details>
-</div>
-</div>
-</article>`;
+window.InterviewProContent["architecture/security"] = ``;
+
+window.InterviewProContent["architecture/security"] += window.InterviewProBuildCards("architecture/security", [
+  {
+    "id": 460,
+    "title": "Чем аутентификация отличается от авторизации? Где проверять право пользователя на конкретный объект, чтобы избежать доступа к чужим данным?",
+    "answer": "**Ответ:** Аутентификация устанавливает, кто обращается; авторизация — что ему разрешено. Одного валидного токена недостаточно для доступа к `/orders/123`.\n\nСервис проверяет владельца, tenant и роль для **каждой операции над объектом**, включая списки и изменение данных. Например, выборка `WHERE id = $1 AND tenant_id = $2` использует tenant из проверенной identity, а не из произвольного поля запроса. Проверка только на фронтенде не защищает API.",
+    "markdown": true
+  },
+  {
+    "id": 461,
+    "title": "Чем серверная сессия отличается от JWT? Какие данные JWT нужно проверять помимо подписи?",
+    "answer": "**Ответ:** При серверной сессии клиент хранит непрозрачный ID, а состояние и отзыв контролирует сервер. JWT содержит claims и проверяемую подпись; его можно валидировать без обращения к хранилищу сессий, но немедленный отзыв требует отдельного механизма.\n\nПроверяют разрешённый алгоритм и доверенный ключ, `iss`, `aud`, сроки `exp`/`nbf` и назначение токена. Декодирование не равно проверке. Подписанный JWT обычно **не зашифрован**: секретные данные в payload не помещают.",
+    "markdown": true
+  },
+  {
+    "id": 462,
+    "title": "Как организовать срок жизни, обновление и отзыв токенов? Что делать при утечке refresh token?",
+    "answer": "**Ответ:** Access token делают короткоживущим, refresh token хранят защищённо и ограничивают сроком действия. При обновлении refresh token ротируют, а повторное использование старого обнаруживают на сервере.\n\nПри компрометации отзывают сессию или семейство refresh-токенов и требуют повторный вход. Уже выпущенный access JWT действует до истечения срока, если нет denylist, проверки версии сессии или introspection. В браузере cookie защищают `HttpOnly`, `Secure`, подходящим `SameSite` и мерами против CSRF.",
+    "markdown": true
+  },
+  {
+    "id": 463,
+    "title": "Чем OAuth 2.0 отличается от OpenID Connect и какую задачу решает каждый?",
+    "answer": "**Ответ:** OAuth 2.0 описывает делегированный доступ клиента к ресурсам через access token и scopes. Сам по себе он не стандартизует вход пользователя.\n\nOpenID Connect добавляет слой идентификации: ID token, стандартные claims и способы получения сведений о пользователе. ID token предназначен клиенту для проверки входа; API принимает access token своего назначения. Для типичного интерактивного входа используют Authorization Code с PKCE и проверками параметров протокола.",
+    "markdown": true
+  },
+  {
+    "id": 464,
+    "title": "Что такое CORS и CSRF? Почему разрешённый origin не заменяет проверку прав доступа?",
+    "answer": "**Ответ:** CORS определяет, каким web-origin браузер разрешит читать межсайтовый ответ. CSRF — выполнение нежелательной операции через браузер пользователя с автоматически приложенными credentials, например cookie.\n\nЗащита от CSRF включает токен, проверки Origin и подходящий SameSite; изменяющие операции не делают через GET. CORS не аутентифицирует клиента, не запрещает обращения вне браузера и не заменяет авторизацию. Некоторые межсайтовые запросы могут отправляться даже без разрешения читать ответ.",
+    "markdown": true
+  },
+  {
+    "id": 465,
+    "title": "Как возникает SSRF в сервисе, который загружает URL пользователя? Какие проверки нужны для адресов, перенаправлений и доступа к внутренней сети?",
+    "answer": "**Ответ:** При SSRF злоумышленник заставляет backend запросить внутренний сервис, localhost или metadata endpoint через пользовательский URL. Предпочтительны разрешённые назначения и протоколы, а не произвольный доступ.\n\nПроверяют URL, все полученные IPv4/IPv6 адреса и каждый redirect; ограничивают порты, время, размер ответа и сетевой egress. Проверенный адрес должен совпадать с адресом фактического подключения, иначе возможна подмена через DNS. Одной проверки строки hostname недостаточно. [OWASP SSRF](https://cheatsheetseries.owasp.org/cheatsheets/Server_Side_Request_Forgery_Prevention_Cheat_Sheet.html).",
+    "markdown": true
+  },
+  {
+    "id": 466,
+    "title": "Что проверяет TLS-клиент и когда нужен mTLS? Как передавать и обновлять секреты, исключая их попадание в логи?",
+    "answer": "**Ответ:** TLS-клиент проверяет цепочку сертификатов до доверенного центра, срок действия и имя сервера. Отключение проверки сертификата разрушает проверку подлинности соединения. При mTLS сервер дополнительно проверяет клиентский сертификат; прикладные права всё равно проверяются отдельно.\n\nСекреты получают из управляемого хранилища по минимальным правам, обновляют с контролируемой ротацией и исключают из URL, дампов конфигурации, логов и tracing. Логируют идентификатор версии секрета, а не его значение.",
+    "markdown": true
+  }
+]);

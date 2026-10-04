@@ -1,18 +1,5 @@
 window.InterviewProContent = window.InterviewProContent || Object.create(null);
-window.InterviewProContent["containers/delivery"] = `<article class="question-card" id="question-3">
-<label class="checklist-item main-question"><input type="checkbox"><span class="question-text"><strong>3.</strong> В чем концептуальная разница между GitOps (werf, Argo CD) и классическим пушем из пайплайна (CI/CD push)?</span></label>
-<details class="answer-details"><summary>Показать ответ</summary>
-<div class="answer-box">
-          <p><strong>Суть:</strong></p>
-<ul>
-  <li><strong>Push-модель (GitLab CI / Jenkins):</strong> CI-раннер имеет админские токены от K8s и пушит манифесты снаружи. Минусы: риски безопасности, рассинхрон при ручных правках.</li>
-  <li><strong>GitOps / Pull-модель (werf, Argo CD):</strong> агент внутри кластера следит за Git-репозиторием и приводит кластер к описанному состоянию. Git — единственный источник правды.</li>
-</ul>
-        </div>
-</details>
-
-</article>
-<article class="question-card" id="question-50">
+window.InterviewProContent["containers/delivery"] = `<article class="question-card" id="question-50">
 <label class="checklist-item main-question"><input type="checkbox"><span class="question-text"><strong>50.</strong> Путь от Git Push до продакшена (Zero Downtime GitOps): как устроен полный цикл сборки, тестирования, безопасной доставки через werf и раскатки в Kubernetes?</span></label>
 <details class="answer-details"><summary>Показать ответ</summary>
 <div class="answer-box">
@@ -23,23 +10,6 @@ window.InterviewProContent["containers/delivery"] = `<article class="question-ca
   <li><strong>GitOps Sync:</strong> манифесты Helm/werf синхронизируются в кластер; секреты шифруются через SOPS или забираются из Vault через External Secrets Operator.</li>
   <li><strong>Zero Downtime Deploy:</strong> RollingUpdate стартует новый под -> проходит Startup/Readiness пробы -> подключается к Endpoints -> старый под получает SIGTERM и корректно дорабатывает запросы благодаря <code>preStop: sleep 10</code>.</li>
 </ol>
-        </div>
-</details>
-
-</article>
-<article class="question-card" id="question-58">
-<label class="checklist-item main-question"><input type="checkbox"><span class="question-text"><strong>58.</strong> Что такое Pod Security Standards (PSS / PSA) и какими директивами в SecurityContext ограничивают привилегии контейнера?</span></label>
-<details class="answer-details"><summary>Показать ответ</summary>
-<div class="answer-box">
-          <p><strong>Суть:</strong> Pod Security Admission (PSA) пришел на смену устаревшему PSP. Задается лейблами на namespace: <code>privileged</code>, <code>baseline</code>, <code>restricted</code>.</p>
-<pre><code class="language-yaml">securityContext:
-  runAsNonRoot: true
-  runAsUser: 10001
-  allowPrivilegeEscalation: false
-  capabilities:
-    drop: ["ALL"]
-  seccompProfile:
-    type: RuntimeDefault</code></pre>
         </div>
 </details>
 
@@ -67,3 +37,24 @@ window.InterviewProContent["containers/delivery"] = `<article class="question-ca
 </details>
 
 </article>`;
+
+window.InterviewProContent["containers/delivery"] += window.InterviewProBuildCards("containers/delivery", [
+  {
+    "id": 424,
+    "title": "Чем Dark Launch отличается от A/B-тестирования и как здесь помогают feature flags?",
+    "answer": "**Dark Launch** позволяет проверить новый код в production, не показывая его результат пользователю. Например, запросы дополнительно обрабатывает новая реализация, а клиент получает ответ старой. Feature flag отделяет выкладку кода от включения функции; выключенный код сам по себе ещё не проверяет поведение под реальной нагрузкой.\n\n**A/B-тестирование** сравнивает варианты продукта на устойчивых группах пользователей по заранее выбранной метрике. Варианты видимы участникам эксперимента. Нужны случайное распределение, достаточная выборка и контроль защитных метрик — ошибок и задержек.\n\nВ теневом запуске исключают повторные платежи, отправку писем и другие побочные эффекты. Скрытый код всё равно потребляет ресурсы и может повлиять на общую БД. Для флагов задают владельца и срок удаления; выключение флага не откатывает уже изменённые данные.",
+    "markdown": true
+  },
+  {
+    "id": 425,
+    "title": "Какие инструменты CI/CD используются и чем система CI отличается от GitOps CD?",
+    "answer": "**CI** запускает автоматические проверки изменений: сборку, тесты, линтеры, проверку зависимостей и публикацию артефакта. Примеры систем: Jenkins, GitLab CI/CD, GitHub Actions, TeamCity, CircleCI. Задания выполняются на агентах или runners; конфигурацию пайплайна хранят вместе с кодом.\n\n**CD** доставляет проверенный артефакт в окружения. Continuous Delivery оставляет решение о выпуске человеку, Continuous Deployment автоматизирует и этот шаг. В GitOps желаемое состояние записано в Git, а Argo CD или Flux согласует с ним Kubernetes-кластер. Сборка образа остаётся задачей CI.\n\nНа собеседовании полезнее описать знакомый пайплайн, чем перечислять продукты: commit → тесты → сборка неизменяемого образа → registry → изменение версии в Git → синхронизация → проверка здоровья. Объясните, где хранятся секреты, кто разрешает выпуск и как выполняется откат.",
+    "markdown": true
+  },
+  {
+    "id": 426,
+    "title": "Как разбирать сбой после деплоя и какие меры снижают риск повторения?",
+    "answer": "Сначала определяют влияние на пользователей по ошибкам, задержкам и ключевым операциям. Приостанавливают раскатку, сравнивают новую версию с предыдущей и сохраняют логи и события. Если откат совместим с текущими данными, возвращают исправный артефакт; иначе отключают функцию или выпускают исправление.\n\nТиповые причины: неверный секрет или адрес зависимости; несовместимая миграция БД; неудачные readiness/startup-пробы; нехватка памяти; отсутствие прав у нового процесса. Проверяют конкретную гипотезу по конфигурации, событиям оркестратора, метрикам и логам. Контейнер не устраняет различия внешних зависимостей.\n\nПрофилактика: воспроизводимые сборки, проверка конфигурации, smoke-тесты после выпуска, постепенная раскатка и критерии остановки. Для схемы БД используют expand–migrate–contract: сначала совместимое расширение, затем перенос данных и кода, удаление старого — отдельным выпуском. Откат приложения не возвращает удалённые данные.\n\nЕсли спрашивают о личном опыте, расскажите реальный случай: симптом → ваша диагностика → действие → результат → предотвращение повторения. Учебный пример обозначайте как учебный.",
+    "markdown": true
+  }
+]);
