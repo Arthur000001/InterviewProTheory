@@ -1,5 +1,5 @@
 (() => {
-  const groups = [{"id":"golang","label":"GoLang","topics":[{"id":"basics","label":"Основы языка","count":13,"path":"golang/basics.html"},{"id":"concurrency","label":"Конкурентность","count":16,"path":"golang/concurrency.html"},{"id":"runtime","label":"Рантайм и профилирование","count":9,"path":"golang/runtime.html"},{"id":"ecosystem","label":"Экосистема и тестирование","count":0,"path":"golang/ecosystem.html"},{"id":"language","label":"Язык и значения","count":17,"path":"golang/language.html"},{"id":"collections_deep","label":"Коллекции и строки","count":4,"path":"golang/collections_deep.html"},{"id":"types","label":"Типы, интерфейсы и структуры","count":5,"path":"golang/types.html"},{"id":"errors","label":"Ошибки и паники","count":7,"path":"golang/errors.html"},{"id":"concurrency_patterns","label":"Паттерны конкурентности","count":4,"path":"golang/concurrency_patterns.html"},{"id":"synchronization","label":"Синхронизация и память","count":3,"path":"golang/synchronization.html"},{"id":"runtime_deep","label":"Планировщик и память","count":8,"path":"golang/runtime_deep.html"},{"id":"generics","label":"Дженерики и итераторы","count":3,"path":"golang/generics.html"},{"id":"context_deep","label":"Контекст и отмена","count":1,"path":"golang/context_deep.html"},{"id":"testing","label":"Тестирование и профилирование","count":4,"path":"golang/testing.html"},{"id":"backend","label":"HTTP, gRPC и данные","count":4,"path":"golang/backend.html"},{"id":"design","label":"Проектирование Go-сервисов","count":3,"path":"golang/design.html"},{"id":"runtime_internals","label":"Внутренности рантайма","count":0,"path":"golang/runtime_internals.html"},{"id":"optimization","label":"Оптимизация и unsafe","count":3,"path":"golang/optimization.html"},{"id":"build_security","label":"Сборка и безопасность","count":2,"path":"golang/build_security.html"}]},{"id":"linux","label":"Linux и ОС","topics":[{"id":"processes","label":"Процессы и файлы","count":4,"path":"linux/processes.html"},{"id":"memory","label":"Память","count":3,"path":"linux/memory.html"},{"id":"kernel","label":"Ядро и диагностика","count":2,"path":"linux/kernel.html"}]},{"id":"network","label":"Сети","topics":[{"id":"transport","label":"Транспорт и маршрутизация","count":1,"path":"network/transport.html"},{"id":"http","label":"HTTP и прокси","count":2,"path":"network/http.html"},{"id":"kubernetes","label":"Сеть Kubernetes","count":2,"path":"network/kubernetes.html"}]},{"id":"containers","label":"Контейнеры и доставка","topics":[{"id":"docker","label":"Docker и контейнеры","count":3,"path":"containers/docker.html"},{"id":"delivery","label":"CI/CD и развёртывание","count":3,"path":"containers/delivery.html"}]},{"id":"kubernetes","label":"Kubernetes","topics":[{"id":"architecture","label":"Устройство кластера","count":3,"path":"kubernetes/architecture.html"},{"id":"operations","label":"Эксплуатация","count":3,"path":"kubernetes/operations.html"}]},{"id":"databases","label":"Базы данных","topics":[{"id":"sql","label":"SQL и транзакции","count":6,"path":"databases/sql.html"},{"id":"postgresql","label":"PostgreSQL","count":5,"path":"databases/postgresql.html"},{"id":"indexes","label":"Индексы и оптимизация","count":5,"path":"databases/indexes.html"},{"id":"distributed","label":"Репликация и распределение","count":1,"path":"databases/distributed.html"},{"id":"redis","label":"Redis и кеширование","count":6,"path":"databases/redis.html"},{"id":"querying","label":"Запросы и представления","count":2,"path":"databases/querying.html"},{"id":"scaling","label":"Модели и масштабирование","count":3,"path":"databases/scaling.html"}]},{"id":"algorithms","label":"Алгоритмы","topics":[{"id":"graphs","label":"Графы и обходы","count":1,"path":"algorithms/graphs.html"}]},{"id":"architecture","label":"Архитектура сервисов","topics":[{"id":"services","label":"API и интеграции","count":1,"path":"architecture/services.html"},{"id":"security","label":"Безопасность","count":0,"path":"architecture/security.html"},{"id":"messaging","label":"Брокеры и доставка событий","count":8,"path":"architecture/messaging.html"},{"id":"distributed","label":"Распределённые системы","count":9,"path":"architecture/distributed.html"},{"id":"service_patterns","label":"Паттерны сервисов","count":4,"path":"architecture/service_patterns.html"},{"id":"scenarios","label":"Архитектурные сценарии","count":3,"path":"architecture/scenarios.html"}]},{"id":"reliability","label":"SRE и наблюдаемость","topics":[{"id":"sre","label":"SRE и показатели","count":2,"path":"reliability/sre.html"},{"id":"observability","label":"Метрики, логи и трассировка","count":4,"path":"reliability/observability.html"},{"id":"resilience","label":"Устойчивость сервисов","count":2,"path":"reliability/resilience.html"}]}];
+  const groups = [{"id":"golang","label":"GoLang","topics":[{"id":"basics","label":"Основы языка","count":13,"path":"golang/basics.html"},{"id":"concurrency","label":"Конкурентность","count":16,"path":"golang/concurrency.html"},{"id":"runtime","label":"Рантайм и профилирование","count":9,"path":"golang/runtime.html"},{"id":"ecosystem","label":"Экосистема и тестирование","count":0,"path":"golang/ecosystem.html"},{"id":"language","label":"Язык и значения","count":18,"path":"golang/language.html"},{"id":"collections_deep","label":"Коллекции и строки","count":4,"path":"golang/collections_deep.html"},{"id":"types","label":"Типы, интерфейсы и структуры","count":10,"path":"golang/types.html"},{"id":"errors","label":"Ошибки и паники","count":7,"path":"golang/errors.html"},{"id":"concurrency_patterns","label":"Паттерны конкурентности","count":4,"path":"golang/concurrency_patterns.html"},{"id":"synchronization","label":"Синхронизация и память","count":3,"path":"golang/synchronization.html"},{"id":"runtime_deep","label":"Планировщик и память","count":8,"path":"golang/runtime_deep.html"},{"id":"generics","label":"Дженерики и итераторы","count":3,"path":"golang/generics.html"},{"id":"context_deep","label":"Контекст и отмена","count":1,"path":"golang/context_deep.html"},{"id":"testing","label":"Тестирование и профилирование","count":4,"path":"golang/testing.html"},{"id":"backend","label":"HTTP, gRPC и данные","count":26,"path":"golang/backend.html"},{"id":"design","label":"Проектирование Go-сервисов","count":3,"path":"golang/design.html"},{"id":"runtime_internals","label":"Внутренности рантайма","count":0,"path":"golang/runtime_internals.html"},{"id":"optimization","label":"Оптимизация и unsafe","count":3,"path":"golang/optimization.html"},{"id":"build_security","label":"Сборка и безопасность","count":2,"path":"golang/build_security.html"}]},{"id":"linux","label":"Linux и ОС","topics":[{"id":"processes","label":"Процессы и файлы","count":4,"path":"linux/processes.html"},{"id":"memory","label":"Память","count":3,"path":"linux/memory.html"},{"id":"kernel","label":"Ядро и диагностика","count":2,"path":"linux/kernel.html"}]},{"id":"network","label":"Сети","topics":[{"id":"transport","label":"Транспорт и маршрутизация","count":1,"path":"network/transport.html"},{"id":"http","label":"HTTP и прокси","count":2,"path":"network/http.html"},{"id":"kubernetes","label":"Сеть Kubernetes","count":7,"path":"network/kubernetes.html"}]},{"id":"containers","label":"Контейнеры и доставка","topics":[{"id":"docker","label":"Docker и контейнеры","count":3,"path":"containers/docker.html"},{"id":"delivery","label":"CI/CD и развёртывание","count":6,"path":"containers/delivery.html"}]},{"id":"kubernetes","label":"Kubernetes","topics":[{"id":"architecture","label":"Устройство кластера","count":9,"path":"kubernetes/architecture.html"},{"id":"operations","label":"Эксплуатация","count":8,"path":"kubernetes/operations.html"}]},{"id":"databases","label":"Базы данных","topics":[{"id":"sql","label":"SQL и транзакции","count":9,"path":"databases/sql.html"},{"id":"postgresql","label":"PostgreSQL","count":9,"path":"databases/postgresql.html"},{"id":"mysql","label":"MySQL","count":8,"path":"databases/mysql.html"},{"id":"indexes","label":"Индексы и оптимизация","count":9,"path":"databases/indexes.html"},{"id":"distributed","label":"Репликация и распределение","count":2,"path":"databases/distributed.html"},{"id":"redis","label":"Redis и кеширование","count":6,"path":"databases/redis.html"},{"id":"querying","label":"Запросы и представления","count":8,"path":"databases/querying.html"},{"id":"scaling","label":"Модели и масштабирование","count":6,"path":"databases/scaling.html"}]},{"id":"algorithms","label":"Алгоритмы","topics":[{"id":"graphs","label":"Графы и обходы","count":1,"path":"algorithms/graphs.html"}]},{"id":"architecture","label":"Архитектура сервисов","topics":[{"id":"services","label":"API и интеграции","count":1,"path":"architecture/services.html"},{"id":"security","label":"Безопасность","count":7,"path":"architecture/security.html"},{"id":"messaging","label":"Брокеры и доставка событий","count":8,"path":"architecture/messaging.html"},{"id":"distributed","label":"Распределённые системы","count":9,"path":"architecture/distributed.html"},{"id":"service_patterns","label":"Паттерны сервисов","count":4,"path":"architecture/service_patterns.html"},{"id":"scenarios","label":"Архитектурные сценарии","count":3,"path":"architecture/scenarios.html"}]},{"id":"reliability","label":"SRE и наблюдаемость","topics":[{"id":"sre","label":"SRE и показатели","count":2,"path":"reliability/sre.html"},{"id":"observability","label":"Метрики, логи и трассировка","count":4,"path":"reliability/observability.html"},{"id":"resilience","label":"Устойчивость сервисов","count":2,"path":"reliability/resilience.html"}]}];
   const body = document.body;
   const root = body.dataset.root || '.';
   const selected = body.dataset.topic || '';
@@ -252,9 +252,9 @@
     'golang/concurrency': [143, 146, 131, 161, 164, 151, 145, 133, 156, 155, 157, 158, 152, 129, 160, 135],
     'golang/runtime': [126, 140, 125, 149, 139, 154, 137, 141, 136],
     'golang/ecosystem': [],
-    'golang/language': [184, 185, 191, 188, 189, 190, 193, 194, 195, 192, 187, 197, 199, 198, 201, 202, 200],
+    'golang/language': [184,185,440,191,188,189,190,193,194,195,192,187,197,199,198,201,202,200],
     'golang/collections_deep': [246, 245, 243, 247],
-    'golang/types': [254, 253, 257, 258, 260],
+    'golang/types': [254,253,441,442,443,444,445,257,258,260],
     'golang/errors': [261, 264, 265, 266, 267, 268, 269],
     'golang/concurrency_patterns': [275, 273, 278, 274],
     'golang/synchronization': [281, 283, 285],
@@ -262,7 +262,7 @@
     'golang/generics': [300, 304, 303],
     'golang/context_deep': [308],
     'golang/testing': [321, 325, 318, 322],
-    'golang/backend': [330, 333, 335, 339],
+    'golang/backend': [446,447,448,449,450,451,452,453,330,333,454,455,456,457,458,459,499,500,501,502,335,503,504,505,506,339],
     'golang/design': [342, 341, 345],
     'golang/runtime_internals': [],
     'golang/optimization': [360, 362, 353],
@@ -272,21 +272,22 @@
     'linux/kernel': [22, 21],
     'network/transport': [30],
     'network/http': [48, 44],
-    'network/kubernetes': [39, 38],
+    'network/kubernetes': [475,476,477,39,38,479,480],
     'containers/docker': [52, 51, 57],
-    'containers/delivery': [59, 50, 60],
-    'kubernetes/architecture': [65, 63, 71],
-    'kubernetes/operations': [79, 62, 72],
-    'databases/sql': [102, 99, 112, 111, 90, 91],
-    'databases/postgresql': [104, 93, 92, 113, 94],
-    'databases/indexes': [95, 97, 108, 105, 107],
-    'databases/distributed': [89],
+    'containers/delivery': [59, 424, 425, 50, 426, 60],
+    'kubernetes/architecture': [65,63,467,468,469,470,473,474,71],
+    'kubernetes/operations': [471,472,478,481,482,79,62,72],
+    'databases/sql': [430,485,102,99,112,111,90,91,490],
+    'databases/mysql': [431, 432, 433, 434, 435, 436, 437, 438],
+    'databases/postgresql': [104,93,92,113,94,494,495,496,498],
+    'databases/indexes': [95,491,427,493,492,97,108,105,107],
+    'databases/distributed': [89,497],
     'databases/redis': [173, 176, 88, 174, 175, 177],
-    'databases/querying': [391, 390],
-    'databases/scaling': [398, 396, 397],
+    'databases/querying': [391,390,428,488,486,487,489,429],
+    'databases/scaling': [483,484,398,439,396,397],
     'algorithms/graphs': [399],
     'architecture/services': [168],
-    'architecture/security': [],
+    'architecture/security': [460,461,462,463,464,465,466],
     'architecture/messaging': [387, 388, 381, 383, 384, 386, 385, 382],
     'architecture/distributed': [371, 373, 379, 372, 378, 377, 376, 375, 380],
     'architecture/service_patterns': [402, 403, 406, 407],
@@ -369,14 +370,11 @@
         .forEach(item => container.append(item));
     });
   };
-  const removedAllQuestionNumbers = new Set([27, 33, 36, 37, 43, 44, 47, 57, 67, 68, 72, 73, 75, 77, 78, 79, 80, 84, 85, 86, 88, 93, 97, 99, 100, 101, 102, 103, 105, 107, 108, 110, 111, 120, 121, 122, 123, 124, 125, 126, 127, 132, 133, 134, 135, 136, 137, 138, 139, 140, 144, 145, 147, 148, 149, 150, 151, 152, 153, 154, 157, 159, 160, 161, 163, 166, 168, 169, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 183, 184, 185, 186, 187, 188, 189, 190, 191, 192, 197, 198, 201, 202, 203, 204, 205, 206, 209, 211, 213, 214, 216, 217, 218, 219, 221, 222, 223, 224, 225, 226, 227, 228, 229, 230, 231, 234, 235, 236, 237, 238, 242, 245, 246, 247, 249, 252, 255, 256, 257, 258, 259, 261, 262, 263, 264, 265, 266, 270, 271, 272, 273, 276, 278, 282, 283, 284, 285, 289, 290, 291, 294, 295, 296, 299, 300, 302, 306, 307, 308, 310, 311, 312, 313, 319, 320, 323, 324, 325, 326, 327, 329, 333, 334, 336, 337, 338, 339, 357, 362, 363, 364, 365, 366, 368, 370, 371, 372, 374, 377, 382, 383, 385, 387, 388]);
   const numberCards = () => {
     let displayNumber = 1;
     list.querySelectorAll('.question-card').forEach(card => {
-      if (allQuestions) {
-        while (removedAllQuestionNumbers.has(displayNumber)) displayNumber++;
-      }
       const number = card.querySelector('.main-question .question-text > strong');
+      // Display position is independent of the stable ID used for study state.
       if (number) number.textContent = String(displayNumber) + '.';
       displayNumber++;
     });
@@ -1220,6 +1218,37 @@
     });
   };
   const additionalSources = {
+    'question-449': [["Документация Server","https://pkg.go.dev/net/http#Server"]],
+    'question-458': [["Правила Protobuf","https://protobuf.dev/programming-guides/proto3/"]],
+    'question-459': [["gRPC Go","https://grpc.io/docs/languages/go/basics/"]],
+    'question-465': [["OWASP SSRF","https://cheatsheetseries.owasp.org/cheatsheets/Server_Side_Request_Forgery_Prevention_Cheat_Sheet.html"]],
+    'question-467': [["Pods","https://kubernetes.io/docs/concepts/workloads/pods/"]],
+    'question-471': [["Jobs","https://kubernetes.io/docs/concepts/workloads/controllers/job/"]],
+    'question-472': [["Sidecar containers","https://kubernetes.io/docs/concepts/workloads/pods/sidecar-containers/"]],
+    'question-475': [["Service","https://kubernetes.io/docs/concepts/services-networking/service/"]],
+    'question-476': [["Service","https://kubernetes.io/docs/concepts/services-networking/service/"]],
+    'question-478': [["Secrets","https://kubernetes.io/docs/concepts/configuration/secret/"]],
+    'question-480': [["NetworkPolicy","https://kubernetes.io/docs/concepts/services-networking/network-policies/"]],
+    'question-481': [["Persistent Volumes","https://kubernetes.io/docs/concepts/storage/persistent-volumes/"]],
+    'question-486': [["Оконные функции","https://www.postgresql.org/docs/current/tutorial-window.html"]],
+    'question-489': [["CTE","https://www.postgresql.org/docs/current/queries-with.html"]],
+    'question-491': [["Типы индексов","https://www.postgresql.org/docs/current/indexes-types.html"]],
+    'question-492': [["Index-only scans","https://www.postgresql.org/docs/current/indexes-index-only-scans.html"]],
+    'question-496': [["PITR","https://www.postgresql.org/docs/current/continuous-archiving.html"]],
+    'question-498': [["Совместимость PgBouncer","https://www.pgbouncer.org/features.html"]],
+    'question-503': [["Транзакции в Go","https://go.dev/doc/database/execute-transactions"]],
+    'question-424': [["Feature Toggles — Martin Fowler","https://martinfowler.com/articles/feature-toggles.html"],["Dark Launching — Martin Fowler","https://martinfowler.com/bliki/DarkLaunching.html"]],
+    'question-425': [["GitHub Actions: workflows","https://docs.github.com/en/actions/concepts/workflows-and-actions/workflows"],["Argo CD: автоматизация из CI","https://argo-cd.readthedocs.io/en/stable/user-guide/ci_automation/"]],
+    'question-427': [["PostgreSQL: частичные индексы","https://www.postgresql.org/docs/current/indexes-partial.html"],["MySQL 8.4: CREATE INDEX","https://dev.mysql.com/doc/refman/8.4/en/create-index.html"]],
+    'question-428': [["MySQL 8.4: производные таблицы","https://dev.mysql.com/doc/refman/8.4/en/derived-tables.html"]],
+    'question-431': [["MySQL 8.4: InnoDB","https://dev.mysql.com/doc/refman/8.4/en/innodb-introduction.html"],["MySQL 8.4: MyISAM","https://dev.mysql.com/doc/refman/8.4/en/myisam-storage-engine.html"]],
+    'question-432': [["MySQL 8.4: VERSION()","https://dev.mysql.com/doc/refman/8.4/en/information-functions.html#function_version"]],
+    'question-433': [["MySQL 8.4: целочисленные типы","https://dev.mysql.com/doc/refman/8.4/en/integer-types.html"]],
+    'question-434': [["MySQL 8.4: DECIMAL","https://dev.mysql.com/doc/refman/8.4/en/fixed-point-types.html"]],
+    'question-435': [["MySQL 8.4: CHAR и VARCHAR","https://dev.mysql.com/doc/refman/8.4/en/char.html"]],
+    'question-436': [["MySQL 8.4: BLOB и TEXT","https://dev.mysql.com/doc/refman/8.4/en/blob.html"],["MySQL 8.4: индексы FULLTEXT","https://dev.mysql.com/doc/refman/8.4/en/create-index.html"]],
+    'question-437': [["MySQL 8.4: ENUM","https://dev.mysql.com/doc/refman/8.4/en/enum.html"]],
+    'question-438': [["MySQL 8.4: DATETIME и TIMESTAMP","https://dev.mysql.com/doc/refman/8.4/en/datetime.html"],["MySQL 8.4: размеры типов","https://dev.mysql.com/doc/refman/8.4/en/storage-requirements.html"]],
     'question-143-followup-5': [
       ['Исходный код Go 1.22: предел стека горутины', 'https://github.com/golang/go/blob/go1.22.0/src/runtime/proc.go#L146-L153']
     ],

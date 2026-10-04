@@ -30,3 +30,36 @@ window.InterviewProContent["golang/types"] = window.InterviewProBuildCards("gola
     "markdown": true
   }
 ]);
+
+window.InterviewProContent["golang/types"] += window.InterviewProBuildCards("golang/types", [
+  {
+    "id": 441,
+    "title": "Как выбрать между value receiver и pointer receiver? Как выбор влияет на изменение состояния и копирование структуры?",
+    "answer": "**Ответ:** Value receiver получает копию значения: подходит небольшим типам без изменяемого состояния. Pointer receiver позволяет менять исходный объект и избегать копирования большой структуры. Типы с mutex нельзя копировать после начала использования.\n\nКопирование структуры **поверхностное**: её slice/map могут продолжать ссылаться на общие данные. Сам по себе pointer receiver не обеспечивает потокобезопасность. Обычно методы одного типа используют согласованный стиль receiver.",
+    "markdown": true
+  },
+  {
+    "id": 442,
+    "title": "Какие методы входят в method set типов T и *T? Почему вызов метода у переменной ещё не доказывает, что её тип реализует интерфейс?",
+    "answer": "**Ответ:** Для обычного именованного типа `T` набор методов содержит методы с receiver `T`, а для `*T` — с receiver `T` и `*T`. У адресуемой переменной компилятор может автоматически взять адрес при вызове метода; при присваивании интерфейсу такого преобразования нет.\n\n```go\ntype Counter struct{ N int }\nfunc (c *Counter) Inc() { c.N++ }\ntype Incrementer interface{ Inc() }\n\nvar c Counter\nc.Inc()                    // (&c).Inc()\nvar _ Incrementer = &c     // корректно\n// var _ Incrementer = c  // Counter не реализует интерфейс\n```",
+    "markdown": true
+  },
+  {
+    "id": 443,
+    "title": "Что такое embedding полей и интерфейсов? Как продвигаются методы и разрешаются конфликты имён?",
+    "answer": "**Ответ:** Embedding — включение типа как поля без отдельного имени либо включение интерфейса в другой интерфейс. Поля и методы вложенного типа могут быть доступны через внешний объект. Это композиция: receiver продвинутого метода остаётся вложенным объектом.\n\n```go\ntype User struct{ Name string }\ntype Admin struct{ User }\n// admin.Name эквивалентно admin.User.Name\n```\n\nБолее близкое объявление скрывает вложенное; одинаковые имена на одной глубине дают неоднозначность. У интерфейсов одноимённые методы должны иметь одинаковые сигнатуры. Встраивание `T` и `*T` по-разному влияет на method set.",
+    "markdown": true
+  },
+  {
+    "id": 444,
+    "title": "Можно ли вызвать метод у nil-указателя и при каких действиях внутри метода возникнет panic?",
+    "answer": "**Ответ:** Метод с pointer receiver можно вызвать у nil-указателя: nil передаётся как receiver. Panic возникает, если метод разыменует его, например прочитает поле, без проверки.\n\n```go\nfunc (u *User) DisplayName() string {\n    if u == nil { return \"anonymous\" }\n    return u.Name\n}\n```\n\nВызов метода с value receiver через nil `*T` требует разыменования и паникует ещё до выполнения тела метода.",
+    "markdown": true
+  },
+  {
+    "id": 445,
+    "title": "Чем method value отличается от method expression? Когда сохраняется receiver?",
+    "answer": "**Ответ:** Method value `f := x.M` вычисляет и сохраняет receiver при создании `f`; затем вызывается как `f(args)`. Для value receiver сохраняется копия значения, для pointer receiver — указатель на тот же объект.\n\nMethod expression `f := T.M` или `f := (*T).M` не привязывает объект: receiver становится первым явным аргументом — `f(x, args)`. Например, `(*Counter).Inc(&c)` вызывает метод для переданного счётчика.",
+    "markdown": true
+  }
+]);

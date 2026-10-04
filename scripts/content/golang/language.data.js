@@ -187,3 +187,12 @@ window.InterviewProContent["golang/language"] = window.InterviewProBuildCards("g
     ]
   }
 ]);
+
+window.InterviewProContent["golang/language"] += window.InterviewProBuildCards("golang/language", [
+  {
+    "id": 440,
+    "title": "Чем отличаются new(T) и make, для каких типов они применимы и какие значения возвращают?",
+    "answer": "**Ответ:** `new(T)` создаёт нулевое значение типа `T` и возвращает `*T`; место размещения определяет компилятор. `make` инициализирует только slice, map и channel и возвращает сам этот тип.\n\n```go\np := new(int)         // *int, значение 0\ns := make([]int, 0, 8)\nm := make(map[string]int)\nch := make(chan int, 2)\n```\n\n`new(map[string]int)` даёт указатель на nil-map: перед записью её ещё нужно инициализировать.",
+    "markdown": true
+  }
+]);
