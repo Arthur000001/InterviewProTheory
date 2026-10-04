@@ -12,16 +12,6 @@ window.InterviewProContent["reliability/observability"] = `<article class="quest
 </details>
 
 </article>
-<article class="question-card" id="question-119">
-<label class="checklist-item main-question"><input type="checkbox"><span class="question-text"><strong>119.</strong> Что такое проблема High Cardinality (высокой кардинальности) меток в Prometheus и как она способна вызвать OOM на сервере мониторинга?</span></label>
-<details class="answer-details"><summary>Показать ответ</summary>
-<div class="answer-box">
-          <p><strong>Суть:</strong> Каждая уникальная комбинация лейблов создает отдельный time-series в TSDB Prometheus.</p>
-<p>Если запихнуть в лейбл <code>user_id</code>, <code>uuid</code> или <code>email</code> — количество временных рядов вырастет до миллионов. Хранилище исчерпает оперативную память и упадет по OOM.</p>
-        </div>
-</details>
-
-</article>
 <article class="question-card" id="question-120">
 <label class="checklist-item main-question"><input type="checkbox"><span class="question-text"><strong>120.</strong> В чем разница между логами (Loki/Elasticsearch/ClickHouse), метриками (Prometheus/VictoriaMetrics) и трейсами (OpenTelemetry/Jaeger)? Когда нужны трейсы?</span></label>
 <details class="answer-details"><summary>Показать ответ</summary>
@@ -31,19 +21,6 @@ window.InterviewProContent["reliability/observability"] = `<article class="quest
   <li><strong>Метрики:</strong> числовые агрегаты во времени. Отвечают на вопрос «Что сломалось и когда?».</li>
   <li><strong>Логи:</strong> дискретные текстовые записи событий. Отвечают на вопрос «Почему сломалось конкретное место?».</li>
   <li><strong>Трейсы:</strong> путь одного запроса сквозь десятки микросервисов с замером задержки на каждом спане. Незаменимы для поиска узких мест (latency bottlenecks) в микросервисной архитектуре.</li>
-</ul>
-        </div>
-</details>
-
-</article>
-<article class="question-card" id="question-122">
-<label class="checklist-item main-question"><input type="checkbox"><span class="question-text"><strong>122.</strong> Как устроена архитектура Prometheus Operator и что такое Custom Resources ServiceMonitor и PodMonitor?</span></label>
-<details class="answer-details"><summary>Показать ответ</summary>
-<div class="answer-box">
-          <p><strong>Суть:</strong> Оператор управляет конфигурацией Prometheus декларативно. Вместо ручной правки конфига <code>prometheus.yml</code>:</p>
-<ul>
-  <li><strong>ServiceMonitor:</strong> CRD, указывающий оператору собирать метрики с подов, привязанных к определенному Service (по селектору лейблов и порту).</li>
-  <li><strong>PodMonitor:</strong> используется, когда у подов нет Service. Оператор автоматически перегенерирует конфиг Prometheus без перезапуска.</li>
 </ul>
         </div>
 </details>
