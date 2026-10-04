@@ -1,14 +1,5 @@
 window.InterviewProContent = window.InterviewProContent || Object.create(null);
-window.InterviewProContent["reliability/sre"] = `<article class="question-card" id="question-1">
-<label class="checklist-item main-question"><input type="checkbox"><span class="question-text"><strong>1.</strong> Что такое подход Blameless Post-Mortem и почему в SRE культуре не ищут «виновного» в инциденте?</span></label>
-<details class="answer-details"><summary>Показать ответ</summary>
-<div class="answer-box">
-          <p><strong>Суть:</strong> Цель — найти системные и технические недостатки платформы, а не наказать инженера. Если один человек ошибся в команде и всё упало — виновата система (отсутствие проверок, валидаций, прав доступа или канареечных тестов). Поиск виновных ведет к замалчиванию проблем.</p>
-        </div>
-</details>
-
-</article>
-<article class="question-card" id="question-2">
+window.InterviewProContent["reliability/sre"] = `<article class="question-card" id="question-2">
 <label class="checklist-item main-question"><input type="checkbox"><span class="question-text"><strong>2.</strong> Что такое SLA, SLO и SLI? Как понять, что сервис деградирует до того, как клиенты пожалуются?</span></label>
 <details class="answer-details"><summary>Показать ответ</summary>
 <div class="answer-box">

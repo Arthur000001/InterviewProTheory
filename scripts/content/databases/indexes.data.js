@@ -35,42 +35,6 @@ window.InterviewProContent["databases/indexes"] = `<article class="question-card
 </div>
 </div>
 </article>
-<article class="question-card" id="question-96">
-<label class="checklist-item main-question"><input type="checkbox"><span class="question-text"><strong>96.</strong> Есть ли в PostgreSQL постоянно поддерживаемый кластерный индекс?</span></label>
-<details class="answer-details"><summary>Показать ответ</summary>
-<div class="answer-box">
-          
-          <p>Команда CLUSTER физически переписывает таблицу по выбранному индексу в момент выполнения. Последующие вставки и обновления не поддерживают этот порядок автоматически, поэтому первичный ключ в PostgreSQL не является постоянно кластерным индексом. Для проверки выгоды учитывают паттерн запросов и стоимость переписывания.</p>
-        
-        </div>
-</details>
-<div class="clarifications" aria-label="Уточнения к вопросу"><h3>Уточнения <small>(4)</small></h3>
-<div class="clarification-item" id="question-96-followup-1" data-parent-question="question-96">
-<label class="checklist-item clarification-question"><input type="checkbox"><span class="question-text">↳ Как сортировка влияет на индекс?</span></label>
-<details class="answer-details"><summary>Показать ответ</summary>
-<div class="answer-box"><p style="white-space: pre-wrap;">Индекс может вернуть строки уже в нужном порядке, если его ключи и направления совместимы с ORDER BY и фильтрами. Иначе БД выполняет явную сортировку; при большой доле таблицы сканирование плюс сортировка может быть дешевле индексного обхода.</p></div>
-</details>
-</div>
-<div class="clarification-item" id="question-96-followup-2" data-parent-question="question-96">
-<label class="checklist-item clarification-question"><input type="checkbox"><span class="question-text">↳ Можно ли сортировать по вычисляемому выражению?</span></label>
-<details class="answer-details"><summary>Показать ответ</summary>
-<div class="answer-box"><p style="white-space: pre-wrap;">Да, ORDER BY принимает выражение или псевдоним вычисленного столбца. Для частого запроса может помочь индекс по выражению, если выражение в запросе совпадает с индексным и планировщик считает его выгодным.</p></div>
-</details>
-</div>
-<div class="clarification-item" id="question-96-followup-3" data-parent-question="question-96">
-<label class="checklist-item clarification-question"><input type="checkbox"><span class="question-text">↳ Что быстрее: сортировка в БД или в коде приложения?</span></label>
-<details class="answer-details"><summary>Показать ответ</summary>
-<div class="answer-box"><p style="white-space: pre-wrap;">Универсального ответа нет. Сортировка в БД часто лучше с LIMIT и индексом, потому что не нужно передавать все строки приложению; в приложении она уместна для уже загруженного небольшого набора. Сравнивайте полный путь по времени и памяти.</p></div>
-</details>
-</div>
-<div class="clarification-item" id="question-96-followup-4" data-parent-question="question-96">
-<label class="checklist-item clarification-question"><input type="checkbox"><span class="question-text">↳ Что делает COLLATE в ORDER BY?</span></label>
-<details class="answer-details"><summary>Показать ответ</summary>
-<div class="answer-box"><p style="white-space: pre-wrap;">COLLATE задаёт правила сравнения строк, включая локаль и порядок символов, для выражения ORDER BY. Другой collation может изменить результат и помешать использованию индекса с несовместимым collation.</p></div>
-</details>
-</div>
-</div>
-</article>
 <article class="question-card" id="question-97">
 <label class="checklist-item main-question"><input type="checkbox"><span class="question-text"><strong>97.</strong> Чем EXPLAIN ANALYZE отличается от EXPLAIN?</span></label>
 <details class="answer-details"><summary>Показать ответ</summary>
@@ -143,30 +107,6 @@ window.InterviewProContent["databases/indexes"] = `<article class="question-card
 </div>
 </div>
 </article>
-<article class="question-card" id="question-106">
-<label class="checklist-item main-question"><input type="checkbox"><span class="question-text"><strong>106.</strong> Что делает CLUSTER и почему его эффект не постоянен?</span></label>
-<details class="answer-details"><summary>Показать ответ</summary>
-<div class="answer-box">
-          
-          <p>CLUSTER переписывает таблицу в порядке индекса, что может улучшить локальность чтения диапазонов. Операция требует блокировки и места для новой копии; последующие изменения строк постепенно нарушают физический порядок. Индекс для будущего повторного запуска запоминается, но автоматической перекластеризации нет.</p>
-        
-        </div>
-</details>
-<div class="clarifications" aria-label="Уточнения к вопросу"><h3>Уточнения <small>(2)</small></h3>
-<div class="clarification-item" id="question-106-followup-1" data-parent-question="question-106">
-<label class="checklist-item clarification-question"><input type="checkbox"><span class="question-text">↳ Чем CLUSTER отличается от VACUUM FULL?</span></label>
-<details class="answer-details"><summary>Показать ответ</summary>
-<div class="answer-box"><p style="white-space: pre-wrap;">CLUSTER физически переупорядочивает таблицу по индексу; порядок затем постепенно нарушается. VACUUM FULL переписывает таблицу для возврата места ОС, но не задаёт порядок по индексу; обе операции требуют серьёзной блокировки.</p></div>
-</details>
-</div>
-<div class="clarification-item" id="question-106-followup-2" data-parent-question="question-106">
-<label class="checklist-item clarification-question"><input type="checkbox"><span class="question-text">↳ Когда целесообразно применять CLUSTER в продакшене?</span></label>
-<details class="answer-details"><summary>Показать ответ</summary>
-<div class="answer-box"><p style="white-space: pre-wrap;">CLUSTER имеет смысл, если диапазонные чтения выигрывают от близости строк и можно запланировать блокировку, место и перепись таблицы. На нагруженном проде сначала измеряют пользу и рассматривают альтернативы.</p></div>
-</details>
-</div>
-</div>
-</article>
 <article class="question-card" id="question-107">
 <label class="checklist-item main-question"><input type="checkbox"><span class="question-text"><strong>107.</strong> Какие риски у ALTER TABLE на большой таблице?</span></label>
 <details class="answer-details"><summary>Показать ответ</summary>
@@ -215,27 +155,4 @@ window.InterviewProContent["databases/indexes"] = `<article class="question-card
 </div>
 </div>
 </article>
-<article class="question-card" id="question-109">
-<label class="checklist-item main-question"><input type="checkbox"><span class="question-text"><strong>109.</strong> Что учитывают при DROP INDEX CONCURRENTLY?</span></label>
-<details class="answer-details"><summary>Показать ответ</summary>
-<div class="answer-box">
-          
-          <p>Команда удаляет индекс без длительного блокирования записей в таблицу, но не работает внутри блока транзакции и имеет ограничения для некоторых индексов. Сначала проверяют, что индекс не поддерживает нужное ограничение и не используется важными планами запросов. Изменение плана после удаления оценивают на реальной нагрузке.</p>
-        
-        </div>
-</details>
-<div class="clarifications" aria-label="Уточнения к вопросу"><h3>Уточнения <small>(2)</small></h3>
-<div class="clarification-item" id="question-109-followup-1" data-parent-question="question-109">
-<label class="checklist-item clarification-question"><input type="checkbox"><span class="question-text">↳ Почему важно использовать CONCURRENTLY при удалении?</span></label>
-<details class="answer-details"><summary>Показать ответ</summary>
-<div class="answer-box"><p style="white-space: pre-wrap;">DROP INDEX CONCURRENTLY удаляет индекс без длительной блокировки обычной работы с таблицей. Операция дольше обычной и не выполняется внутри стандартного блока транзакции.</p></div>
-</details>
-</div>
-<div class="clarification-item" id="question-109-followup-2" data-parent-question="question-109">
-<label class="checklist-item clarification-question"><input type="checkbox"><span class="question-text">↳ Что произойдёт, если индекс используется запросами?</span></label>
-<details class="answer-details"><summary>Показать ответ</summary>
-<div class="answer-box"><p style="white-space: pre-wrap;">После удаления планировщик не сможет использовать этот индекс; новые запросы могут стать медленнее. Команда согласует удаление с активными операциями через блокировки и ожидание, поэтому сначала оцените критичные планы.</p></div>
-</details>
-</div>
-</div>
-</article>`;
+`;

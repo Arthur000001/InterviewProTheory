@@ -36,12 +36,6 @@ window.InterviewProContent["golang/runtime_deep"] = window.InterviewProBuildCard
     "markdown": true
   },
   {
-    "id": 295,
-    "title": "Что такое Green Tea GC?",
-    "answer": "Новый алгоритм маркировки (эксперимент в Go 1.25, **по умолчанию с Go 1.26**): сканирует не отдельные объекты, а целые **страницы (spans)** мелких объектов — лучше локальность памяти и кэшей, меньше промахов. Снижает накладные расходы GC на 10–40% в реальных программах; на новых CPU с векторными инструкциями — ещё ~10%. Отключение: `GOEXPERIMENT=nogreenteagc`.",
-    "markdown": true
-  },
-  {
     "id": 296,
     "title": "GOGC и GOMEMLIMIT",
     "answer": "- `GOGC=100` (по умолчанию): следующий GC, когда живая куча вырастет на 100%. Больше — реже GC, больше памяти.\n- `GOMEMLIMIT` (Go 1.19): **мягкий** лимит памяти рантайма. GC учащается при приближении. Рекомендация для контейнеров: `GOMEMLIMIT` ≈ 80–90% лимита пода. `GOGC=off` + `GOMEMLIMIT` — GC только у лимита (осторожно: риск death spiral).",
@@ -53,10 +47,4 @@ window.InterviewProContent["golang/runtime_deep"] = window.InterviewProBuildCard
     "answer": "Меньше аллокаций: предвыделение (`make(..., 0, n)`), `sync.Pool`, значения вместо указателей, `strings.Builder`, избегать `any`/`fmt` в горячем пути, структуры без указателей (GC их не сканирует). Смотреть `go test -bench . -benchmem`, `pprof -alloc_space`, `GODEBUG=gctrace=1`.",
     "markdown": true
   },
-  {
-    "id": 298,
-    "title": "Финализаторы и runtime.AddCleanup",
-    "answer": "`runtime.SetFinalizer` — ненадёжен, воскрешает объект, мешает циклам. **С Go 1.24** — `runtime.AddCleanup(ptr, fn, arg)`: несколько cleanup на объект, не воскрешает, работает с циклами. Также в 1.24 появился пакет `weak` (слабые указатели) — для кэшей и интернирования (см. пакет `unique`, Go 1.23).",
-    "markdown": true
-  }
 ]);

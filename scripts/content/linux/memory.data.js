@@ -1,15 +1,5 @@
 window.InterviewProContent = window.InterviewProContent || Object.create(null);
-window.InterviewProContent["linux/memory"] = `<article class="question-card" id="question-11">
-<label class="checklist-item main-question"><input type="checkbox"><span class="question-text"><strong>11.</strong> Как работает OOM Killer в Linux и на основе чего ядро выбирает, какой процесс принудительно завершить (oom_score, oom_score_adj)?</span></label>
-<details class="answer-details"><summary>Показать ответ</summary>
-<div class="answer-box">
-          <p><strong>Суть:</strong> При нехватке физической памяти ядро начисляет процессам <code>oom_score</code> (от 0 до 1000) пропорционально доле занимаемой RAM. Убивается процесс с наивысшим баллом.</p>
-<p>Приоритет регулируется через <code>/proc/&lt;PID&gt;/oom_score_adj</code> (-1000 — иммунитет от OOM, +1000 — убить первым). В K8s Guaranteed поды имеют adj -997, а BestEffort 1000.</p>
-        </div>
-</details>
-
-</article>
-<article class="question-card" id="question-18">
+window.InterviewProContent["linux/memory"] = `<article class="question-card" id="question-18">
 <label class="checklist-item main-question"><input type="checkbox"><span class="question-text"><strong>18.</strong> Как устроена виртуальная память в Linux (Virtual Memory, RSS, Swap, Page Faults)?</span></label>
 <details class="answer-details"><summary>Показать ответ</summary>
 <div class="answer-box">
@@ -108,33 +98,4 @@ window.InterviewProContent["linux/memory"] = `<article class="question-card" id=
 </div>
 </div>
 </article>
-<article class="question-card" id="question-28">
-<label class="checklist-item main-question"><input type="checkbox"><span class="question-text"><strong>28.</strong> Что такое TLB и когда помогают HugePages?</span></label>
-<details class="answer-details"><summary>Показать ответ</summary>
-<div class="answer-box">
-          
-          <p>TLB кеширует преобразования виртуальных адресов в физические. При промахе процессор читает таблицы страниц, что дороже попадания в TLB. Большие страницы покрывают больше памяти одной записью и могут уменьшить число промахов, но усложняют управление памятью и не ускоряют всякую нагрузку.</p>
-        
-        </div>
-</details>
-<div class="clarifications" aria-label="Уточнения к вопросу"><h3>Уточнения <small>(3)</small></h3>
-<div class="clarification-item" id="question-28-followup-1" data-parent-question="question-28">
-<label class="checklist-item clarification-question"><input type="checkbox"><span class="question-text">↳ Что происходит при TLB miss?</span></label>
-<details class="answer-details"><summary>Показать ответ</summary>
-<div class="answer-box"><p style="white-space: pre-wrap;">При TLB miss процессор не находит готовую трансляцию адреса и читает таблицы страниц в памяти; найденное отображение затем может попасть в TLB. Если отображения нет или доступ запрещён, возникает page fault.</p></div>
-</details>
-</div>
-<div class="clarification-item" id="question-28-followup-2" data-parent-question="question-28">
-<label class="checklist-item clarification-question"><input type="checkbox"><span class="question-text">↳ Зачем нужны hugepages и когда они реально полезны?</span></label>
-<details class="answer-details"><summary>Показать ответ</summary>
-<div class="answer-box"><p style="white-space: pre-wrap;">Hugepages увеличивают объём памяти, покрываемый одной записью TLB, и могут помочь большим рабочим наборам, например базам данных. Польза зависит от частоты TLB miss; выделение больших страниц и расход памяти имеют собственную цену.</p></div>
-</details>
-</div>
-<div class="clarification-item" id="question-28-followup-3" data-parent-question="question-28">
-<label class="checklist-item clarification-question"><input type="checkbox"><span class="question-text">↳ Почему TLB ограничен по размеру?</span></label>
-<details class="answer-details"><summary>Показать ответ</summary>
-<div class="answer-box"><p style="white-space: pre-wrap;">TLB — быстрый аппаратный кеш, поэтому его ёмкость ограничена площадью, энергопотреблением и временем поиска. Более крупный TLB не бесплатен; процессоры используют уровни кеша и разные размеры страниц как компромисс.</p></div>
-</details>
-</div>
-</div>
-</article>`;
+`;
