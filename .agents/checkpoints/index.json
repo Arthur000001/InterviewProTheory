@@ -1,7 +1,26 @@
 {
   "schema_version": 1,
+  "latest_id": "2026-10-04-task2-stop-correction",
   "time_note": "В исходных точках часы не записаны; null означает неизвестное время, не 00:00.",
   "entries": [
+    {
+      "id": "2026-10-04-task2-stop-correction",
+      "date": "2026-10-04",
+      "time": "00:29:02+04:00",
+      "title": "Статус Task 2 исправлен",
+      "report": "reports/2026-10-04_task2_stop_correction.md",
+      "state": "applied_uncommitted",
+      "failed_attempts": 0
+    },
+    {
+      "id": "2026-10-04-index-only-checkpoints",
+      "date": "2026-10-04",
+      "time": "00:20:13+04:00",
+      "title": "Единый индекс точек",
+      "report": "reports/2026-10-04_index_only_checkpoints.md",
+      "state": "applied_uncommitted",
+      "failed_attempts": 1
+    },
     {
       "id": "2026-10-04-pause",
       "date": "2026-10-04",
@@ -123,17 +142,18 @@
       "id": "2026-09-28-interview-hard-stop",
       "date": "2026-09-28",
       "time": null,
-      "title": "STOP собеседования",
+      "title": "STOP собеседования снят",
       "report": "reports/2026-09-28_interview_hard_stop.md",
-      "state": "hard_stop",
-      "failed_attempts": 2
+      "state": "resolved",
+      "failed_attempts": 2,
+      "resolved_date": "2026-09-29"
     },
     {
       "id": "task9-hard-stop",
       "date": null,
       "time": null,
       "title": "STOP Task 9",
-      "report": "reports/task9_hard_stop.md",
+      "report": "reports/2026-10-03_task9_hard_stop.md",
       "state": "hard_stop",
       "failed_attempts": 2
     }
