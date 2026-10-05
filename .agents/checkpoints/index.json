@@ -1,8 +1,17 @@
 {
   "schema_version": 1,
-  "latest_id": "2026-10-05-json-picker-iframe",
+  "latest_id": "2026-10-05-merge-new-questions",
   "time_note": "В исходных точках часы не записаны; null означает неизвестное время, не 00:00.",
   "entries": [
+    {
+      "id": "2026-10-05-merge-new-questions",
+      "date": "2026-10-05",
+      "time": "13:17:53+04:00",
+      "title": "Локальное слияние feature/new-questions",
+      "report": "reports/2026-10-05_merge_new_questions.md",
+      "state": "local_merge_verified_push_pending",
+      "failed_attempts": 1
+    },
     {
       "id": "2026-10-05-json-picker-iframe",
       "date": "2026-10-05",
@@ -92,6 +101,15 @@
       "report": "reports/2026-10-04_task6_browser_storage.md",
       "state": "applied_unverified",
       "failed_attempts": 1
+    },
+    {
+      "id": "2026-10-04-new-questions",
+      "date": "2026-10-04",
+      "time": "14:41:03Z",
+      "title": "Разбор new.md и добавление уникальных вопросов",
+      "report": "reports/2026-10-04_new_questions.md",
+      "state": "verified",
+      "failed_attempts": 0
     },
     {
       "id": "2026-10-04-task6-profiles-and-export",
