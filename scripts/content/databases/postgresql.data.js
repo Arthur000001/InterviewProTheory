@@ -5,7 +5,28 @@ window.InterviewProContent["databases/postgresql"] = `<article class="question-c
 <div class="answer-box">
           
           
-          <div class="complete-answer"><p>PostgreSQL использует блокировки таблиц, строк, advisory locks и блокировки на уровне внутренней реализации. Обычные SELECT берут AccessShareLock на таблицу; INSERT, UPDATE и DELETE берут табличную RowExclusiveLock и блокируют изменяемые строки. DDL может требовать более строгих блокировок вплоть до AccessExclusiveLock. MVCC позволяет читателям не блокировать обычные записи, но конкурирующие изменения строк ждут друг друга; диагностировать ожидания можно через pg_stat_activity и pg_locks.</p></div>
+          <div class="complete-answer">
+            <p>PostgreSQL различает <strong>режимы блокировки таблицы</strong> и <strong>режимы блокировки конкретной строки</strong>. Один запрос может брать оба уровня. Слова <code>ROW SHARE</code> и <code>ROW EXCLUSIVE</code> обозначают именно табличные режимы, а не блокировку строки. Блокировка мешает только несовместимому режиму на том же объекте; обычный <code>SELECT</code> благодаря MVCC обычно читает данные параллельно с изменением строк.</p>
+            <p><strong>Все 8 табличных режимов — зачем нужны и кто их берёт:</strong></p>
+            <ul>
+              <li><code>ACCESS SHARE</code> — защищает таблицу от удаления или перестройки во время чтения; его берёт обычный <code>SELECT</code>. Ему мешает только <code>ACCESS EXCLUSIVE</code>.</li>
+              <li><code>ROW SHARE</code> — отмечает, что запрос собирается блокировать выбранные строки; его берёт <code>SELECT ... FOR UPDATE/NO KEY UPDATE/SHARE/KEY SHARE</code>. Не запрещает обычные чтения и изменения других строк.</li>
+              <li><code>ROW EXCLUSIVE</code> — защищает таблицу на время изменения данных; его берут <code>INSERT</code>, <code>UPDATE</code>, <code>DELETE</code>, <code>MERGE</code>. Несколько изменяющих транзакций могут держать его одновременно, если не конфликтуют на строках.</li>
+              <li><code>SHARE UPDATE EXCLUSIVE</code> — позволяет обслуживать таблицу без остановки обычного чтения и записи, но исключает конкурирующее обслуживание и ряд изменений схемы; его берут обычные <code>VACUUM</code>, <code>ANALYZE</code>, <code>CREATE INDEX CONCURRENTLY</code>.</li>
+              <li><code>SHARE</code> — защищает таблицу от изменения данных во время операции, которой нужна стабильная таблица; пример — <code>CREATE INDEX</code> без <code>CONCURRENTLY</code>. Обычные читатели продолжают работу, писатели ждут.</li>
+              <li><code>SHARE ROW EXCLUSIVE</code> — запрещает конкурентное изменение данных и одновременное выполнение такой же операции; его берут <code>CREATE TRIGGER</code> и некоторые формы <code>ALTER TABLE</code>.</li>
+              <li><code>EXCLUSIVE</code> — оставляет доступ только обычным читателям с <code>ACCESS SHARE</code>; пример — <code>REFRESH MATERIALIZED VIEW CONCURRENTLY</code>.</li>
+              <li><code>ACCESS EXCLUSIVE</code> — даёт исключительный доступ к таблице, блокируя даже обычный <code>SELECT</code>; его берут <code>TRUNCATE</code>, <code>DROP TABLE</code>, <code>VACUUM FULL</code> и многие формы <code>ALTER TABLE</code>.</li>
+            </ul>
+            <p><strong>Все 4 режима блокировки строк — что защищают:</strong></p>
+            <ul>
+              <li><code>FOR KEY SHARE</code> — не даёт удалить строку или изменить её ключ, на который может ссылаться внешний ключ; допускает изменение неключевых полей. Используется, в частности, при проверке ссылочной целостности.</li>
+              <li><code>FOR SHARE</code> — даёт нескольким транзакциям совместно защитить строку от изменения или удаления. <code>SELECT ... FOR SHARE</code> блокирует конкурирующие <code>UPDATE</code> и <code>DELETE</code> этой строки.</li>
+              <li><code>FOR NO KEY UPDATE</code> — исключает конкурирующее изменение той же строки, но допускает <code>FOR KEY SHARE</code>, поскольку ключ не меняется. Обычно его берёт <code>UPDATE</code> неключевых полей.</li>
+              <li><code>FOR UPDATE</code> — самый строгий строковый режим: исключает другие захваты и изменения этой строки. Его берут <code>DELETE</code>, изменение ключевых столбцов через <code>UPDATE</code> и явный <code>SELECT ... FOR UPDATE</code>.</li>
+            </ul>
+            <p><strong>Другие семейства:</strong> <code>advisory locks</code> приложение берёт по условному ключу для собственного правила взаимного исключения; БД сама не связывает их со строками, а время жизни может быть до конца транзакции или сессии. Краткие блокировки страниц защищают внутренний доступ к страницам памяти и обычно не управляются приложением. Предикатные <code>SIReadLock</code> на уровне <code>SERIALIZABLE</code> отслеживают опасные сочетания чтения и записи для обнаружения аномалий сериализации; сами по себе они не блокируют запросы. Для анализа ожиданий смотрят <code>pg_locks</code>, <code>pg_stat_activity</code> и <code>pg_blocking_pids()</code>.</p>
+          </div>
 
   <div style="margin: 12px 0; padding: 12px 16px; background: rgba(245, 158, 11, 0.08); border-left: 4px solid #f59e0b; border-radius: 6px;">
     <strong style="color: #f59e0b; display: block; margin-bottom: 8px; font-size: 0.95rem;">🟡 Базовый уровень:</strong>

@@ -224,6 +224,8 @@
     }
   };
   const profileNameStorageKey = 'interviewpro-theory-profile-name-v1';
+  const topicKeys = groups.flatMap(group => group.topics.map(topic => group.id + '/' + topic.id));
+  const topicFileName = topic => topic.replace('/', '__') + '.json';
   const validProfileName = name => /^[\p{L}\p{N}_-]{1,64}$/u.test(name);
   let profileName = 'artur';
   try {
@@ -251,7 +253,18 @@
     studyDirty = dirty;
     writePreference(dirtyStudyStorageKey, dirty ? '1' : '0');
   };
-  const showProfileStatus = message => { profileStatus.textContent = message; };
+  const showProfileStatus = (message, openDirectly = false) => {
+    [profileStatus, ...document.querySelectorAll('.study-save-status')].forEach(status => {
+      status.textContent = message;
+      if (!openDirectly) return;
+      const link = document.createElement('a');
+      link.href = window.location.href;
+      link.target = '_blank';
+      link.rel = 'noopener';
+      link.textContent = 'Открыть страницу отдельно';
+      status.append(' ', link);
+    });
+  };
   sidebar.querySelector('#profile-rename').addEventListener('click', () => {
     const nextName = window.prompt('Новое имя профиля (буквы, цифры, _ или -):', profileName);
     if (nextName === null) return;
@@ -305,22 +318,26 @@
   };
   const ensureStoreFolder = async () => {
     if (typeof window.showDirectoryPicker !== 'function') {
-      throw new Error('Этот браузер не поддерживает запись в папку store.');
+      throw new Error('Этот браузер не поддерживает запись в выбранную папку.');
+    }
+    if (storeHandle && !['store', 'data', profileName].includes(storeHandle.name)) {
+      storeHandle = null;
     }
     if (storeHandle) {
       if (await storeHandle.requestPermission({ mode: 'readwrite' }) === 'granted') {
         return storeHandle;
       }
       storeHandle = null;
-      throw new Error('Доступ к store не разрешён. Нажмите кнопку ещё раз, чтобы выбрать папку.');
+      throw new Error('Доступ к выбранной папке не разрешён. Нажмите кнопку ещё раз.');
     }
     const handle = await window.showDirectoryPicker({ id: 'interviewpro-store', mode: 'readwrite' });
-    if (handle.name !== 'store') {
-      throw new Error('Выберите папку InterviewProTheory/store.');
+    if (!['store', 'data', profileName].includes(handle.name)) {
+      throw new Error('Выберите папку store, data или папку профиля ' + profileName + '.');
     }
     storeHandle = handle;
-    if (await handle.queryPermission({ mode: 'readwrite' }) !== 'granted') {
-      throw new Error('Разрешите запись в папку store и нажмите кнопку ещё раз.');
+    if (await handle.requestPermission({ mode: 'readwrite' }) !== 'granted') {
+      storeHandle = null;
+      throw new Error('Разрешите запись в выбранную папку.');
     }
     stateLoaded = false;
     writePreference(loadedStorageKey(), '0');
@@ -349,7 +366,9 @@
   };
   const profileFolder = async create => {
     try {
-      const data = await storeHandle.getDirectoryHandle('data', { create });
+      if (storeHandle.name === profileName) return storeHandle;
+      const data = storeHandle.name === 'data'
+        ? storeHandle : await storeHandle.getDirectoryHandle('data', { create });
       return await data.getDirectoryHandle(profileName, { create });
     } catch (cause) {
       if (cause.name === 'NotFoundError') return null;
@@ -358,22 +377,93 @@
   };
   const readProfileState = async () => {
     const directory = await profileFolder(false);
-    const state = directory && await readJsonFile(directory, stateFileName);
-    if (!state) {
+    if (!directory) {
       const cause = new Error('У ' + profileName + ' пока нет сохранённых данных.');
       cause.code = 'no_data';
       throw cause;
     }
-    if (state.version !== 1 || state.profile !== profileName || !validStudyMarks(state.studied)) {
+    const legacy = await readJsonFile(directory, stateFileName);
+    if (legacy && (legacy.version !== 1 || legacy.profile !== profileName || !validStudyMarks(legacy.studied))) {
       throw new Error('Некорректный файл data/' + profileName + '/state.json.');
     }
-    return state;
+    const marks = legacy ? { ...legacy.studied } : { ...studySnapshot() };
+    let hasSavedState = Boolean(legacy);
+    for (const topic of topicKeys) {
+      const saved = await readJsonFile(directory, topicFileName(topic));
+      if (!saved) continue;
+      if (saved.version !== 1 || saved.profile !== profileName || saved.topic !== topic ||
+          !Array.isArray(saved.questions)) {
+        throw new Error('Некорректный файл ' + topicFileName(topic) + '.');
+      }
+      for (const question of saved.questions) {
+        if (!question || !/^question-\d+$/.test(question.id) ||
+            typeof question.text !== 'string' || !Array.isArray(question.clarifications)) {
+          throw new Error('Некорректный файл ' + topicFileName(topic) + '.');
+        }
+        for (const item of [question, ...question.clarifications]) {
+          if (!item || typeof item.id !== 'string' ||
+              (item.studied !== null && typeof item.studied !== 'boolean')) {
+            throw new Error('Некорректный файл ' + topicFileName(topic) + '.');
+          }
+          if (item.studied === true) marks[item.id] = true;
+          if (item.studied === false) delete marks[item.id];
+          if (item.studied !== null) hasSavedState = true;
+        }
+      }
+    }
+    if (!hasSavedState) {
+      const cause = new Error('У ' + profileName + ' пока нет сохранённых данных.');
+      cause.code = 'no_data';
+      throw cause;
+    }
+    return { studied: marks };
   };
-  const writeProfileState = async marks => {
+  const topicSnapshot = section => ({
+    version: 1,
+    profile: profileName,
+    topic: section.dataset.studyTopic,
+    savedAt: new Date().toISOString(),
+    questions: [...section.querySelectorAll(':scope > .question-card')].map(card => {
+      const title = card.querySelector(':scope > .answer-details > .main-question .question-text');
+      return {
+        id: card.id,
+        text: title?.textContent.trim().replace(/^\d+\.\s*/, '') || '',
+        studied: studied[card.id] === true,
+        clarifications: [...card.querySelectorAll(':scope > .answer-details > .clarifications .clarification-item')]
+          .map(item => ({
+            id: item.id,
+            text: item.querySelector(':scope > .answer-details > .clarification-question .question-text')
+              ?.textContent.trim().replace(/^↳\s*/, '') || '',
+            studied: studied[item.id] === true
+          }))
+      };
+    })
+  });
+  const writeProfileState = async () => {
     const directory = await profileFolder(true);
-    await writeJsonFile(directory, stateFileName, {
-      version: 1, profile: profileName, savedAt: new Date().toISOString(), studied: marks
-    });
+    const sections = [...list.querySelectorAll('.question-section[data-study-topic]')];
+    if (!sections.length) throw new Error('Темы на странице не найдены.');
+    const visible = new Map(sections.map(section => [section.dataset.studyTopic, topicSnapshot(section)]));
+    let written = 0;
+    for (const topic of topicKeys) {
+      const source = visible.get(topic) || await readJsonFile(directory, topicFileName(topic));
+      if (!source) continue;
+      const snapshot = {
+        ...source,
+        profile: profileName,
+        savedAt: new Date().toISOString(),
+        questions: source.questions.map(question => ({
+          ...question,
+          studied: studied[question.id] === true,
+          clarifications: question.clarifications.map(item => ({
+            ...item, studied: studied[item.id] === true
+          }))
+        }))
+      };
+      await writeJsonFile(directory, topicFileName(topic), snapshot);
+      written++;
+    }
+    return written;
   };
   const loadProfileState = async () => {
     if (studyDirty) {
@@ -393,12 +483,17 @@
       setStudyDirty(false);
       showProfileStatus('Состояние ' + profileName + ' загружено.');
     } catch (cause) {
+      if (cause.name === 'SecurityError' && /Cross origin sub frames/i.test(cause.message)) {
+        showProfileStatus('Встроенный предпросмотр запрещает выбор папки. Откройте страницу отдельно и повторите загрузку.', true);
+        return;
+      }
       showProfileStatus(cause.code === 'no_data'
         ? 'У ' + profileName + ' пока нет сохранённых данных. Текущие отметки остались в браузере.'
         : 'Не удалось загрузить: ' + cause.message);
     }
   };
   const saveCurrentProfile = async () => {
+    showProfileStatus('Сохранение...');
     try {
       await ensureStoreFolder();
       if (!stateLoaded) {
@@ -410,19 +505,24 @@
           if (cause.code !== 'no_data') throw cause;
         }
       }
-      await writeProfileState(studySnapshot());
+      const written = await writeProfileState();
       stateLoaded = true;
       writePreference(loadedStorageKey(), '1');
       setStudyDirty(false);
-      showProfileStatus('Состояние ' + profileName + ' сохранено в data/' + profileName + '/state.json.');
+      showProfileStatus('Сохранено файлов тем: ' + written + ' в data/' + profileName + '/.');
     } catch (cause) {
-      if (cause.name !== 'AbortError') showProfileStatus('Не удалось сохранить: ' + cause.message);
+      if (cause.name === 'SecurityError' && /Cross origin sub frames/i.test(cause.message)) {
+        showProfileStatus('Встроенный предпросмотр запрещает выбор папки. Откройте страницу отдельно и повторите сохранение.', true);
+        return;
+      }
+      showProfileStatus(cause.name === 'AbortError'
+        ? 'Сохранение отменено. Файл не записан.'
+        : 'Не удалось сохранить: ' + cause.message);
     }
   };
   const initStudyFolder = async () => {
     try { storeHandle = await savedFolder(); }
     catch (_) { /* folder can still be chosen on save or load */ }
-    showProfileStatus('');
   };
   list.addEventListener('change', event => {
     if (!event.target.matches('.question-checkbox input[type="checkbox"]')) return;
@@ -448,7 +548,8 @@
       return '<p class="content-error">Не удалось загрузить раздел «' + topic.label + '».</p>';
     }
     const heading = summary ? 'h3' : 'h2';
-    return '<section class="question-section" id="topic-' + group.id + '-' + topic.id + '">' +
+    return '<section class="question-section" id="topic-' + group.id + '-' + topic.id +
+      '" data-study-topic="' + key + '">' +
       '<' + heading + '>' + topic.label + ' <small>(' + topic.count + ')</small></' + heading + '>' +
       content[key] + '</section>';
   };
@@ -854,19 +955,25 @@
     "question-177-followup-1": ["только первый клиент получит блокировку","сравнить сохранённый токен со своим и удалить ключ атомарно","Сам SETNX без срока"],
     "question-177-followup-2": ["освобождает блокировку, если владелец умер","атомарно вместе с захватом","защита от прежнего владельца"],
     "question-90": ["атомарную единицу","COMMIT фиксирует результат","ROLLBACK отменяет его","PostgreSQL трактует Read Uncommitted как Read Committed","тем вероятнее конфликты"],
-    "question-90-followup-1": ["ко всей таблице","к выбранным строкам","не запрещает обычный SELECT благодаря MVCC"],
-    "question-90-followup-2": ["несколько читателей","Конкретная совместимость зависит от уровня"],
+    "question-90-followup-1": ["Один оператор может брать оба уровня","не означают блокировку строк","Обычный SELECT не ждёт построчную блокировку"],
+    "question-90-followup-2": ["ACCESS SHARE совместим с ROW EXCLUSIVE","SHARE конфликтует с ROW EXCLUSIVE","Точную совместимость определяют режим и объект блокировки"],
     "question-90-followup-3": ["цикл ожиданий","отменяет одну транзакцию","единым порядком захвата ресурсов"],
     "question-90-followup-4": ["pg_locks с pg_stat_activity","pg_blocking_pids(pid)","снимок меняется"],
-    "question-90-followup-5": ["чтение неподтверждённых данных","повторное чтение той же строки","изменение набора строк","не допускает dirty read"],
-    "question-90-followup-6": ["снимок на оператор","REPEATABLE READ — на транзакцию","ошибкой сериализации"],
+    "question-90-followup-5": ["Dirty read (грязное чтение)","Non-repeatable read (неповторяемое чтение)","Phantom read (фантом)","Serialization anomaly (аномалия сериализации)"],
+    "question-90-followup-6": ["READ UNCOMMITTED по стандарту","READ COMMITTED (уровень PostgreSQL по умолчанию)","REPEATABLE READ: снимок закреплён","SERIALIZABLE: результат успешно завершённых транзакций"],
     "question-90-followup-7": ["READ COMMITTED","каждый оператор видит снимок данных"],
     "question-90-followup-8": ["транзакции короткими","SKIP LOCKED","не убирайте блокировки ценой потери корректности"],
-    "question-91": ["Грязное чтение","неповторяемое чтение","фантомное чтение","lost update, write skew","ошибок сериализации"],
-    "question-91-followup-1": ["атомарность, согласованность, изоляцию и долговечность","либо весь набор фиксируется, либо откатывается"],
+    "question-90-followup-9": ["Режимы на одной таблице совместимы","ACCESS EXCLUSIVE","единственный режим, блокирующий обычный"],
+    "question-90-followup-10": ["одной и той же строки","FOR KEY SHARE","FOR NO KEY UPDATE","FOR UPDATE","не запрашивает строковую блокировку"],
+    "question-91": ["Грязное чтение","Неповторяемое чтение","Фантомное чтение","Аномалия сериализации","lost update","SERIALIZABLE отменяет опасную транзакцию"],
+    "question-91-followup-1": ["Atomicity: все её изменения","Consistency: транзакция переводит данные","Isolation: результат параллельной работы","Durability: подтверждённый COMMIT"],
     "question-91-followup-2": ["COMMIT фиксирует изменения","ROLLBACK отменяет изменения","кроме внешних побочных эффектов"],
     "question-91-followup-3": ["точку внутри транзакции","откатывает изменения после неё","оставляя изменения в общей транзакции"],
     "question-91-followup-4": ["помечает её как прерванную","ROLLBACK TO SAVEPOINT"],
+    "question-91-followup-5": ["сохраняются оба изменения","не сохраняется ни одно","отправленное письмо или внешний платёж"],
+    "question-91-followup-6": ["сохранять инварианты данных","бизнес-правило, не выраженное ограничением","Допустимое состояние до транзакции"],
+    "question-91-followup-7": ["выбранный уровень изоляции","соответствовал некоторому последовательному выполнению","Изоляция не означает физического выполнения"],
+    "question-91-followup-8": ["После подтверждённого","журналу WAL","Граница гарантии зависит от настроек","не означает, что изменение уже попало"],
     "question-99": ["check_violation","UNKNOWN для NULL не нарушает ограничение","NOT NULL","Отключение триггеров не отключает CHECK"],
     "question-99-followup-1": ["частых или долгих записях","дороже обычного Mutex","проверяйте бенчмарком"],
     "question-99-followup-2": ["шарды с собственными блокировками","Сначала подтвердите проблему профилем"],
@@ -884,7 +991,7 @@
     "question-397-followup-1": ["концентрируются на одной активной партиции или шарде"],
     "question-398": ["ресурсы одному узлу","добавляет экземпляры","по конкретному узкому месту"],
     "question-398-followup-1": ["предел уже находится в БД","увеличат давление на узкое место"],
-    "question-92": ["AccessShareLock","RowExclusiveLock","AccessExclusiveLock","MVCC позволяет читателям не блокировать обычные записи","pg_stat_activity и pg_locks"],
+    "question-92": ["8 табличных режимов","ACCESS SHARE","ROW SHARE","ROW EXCLUSIVE","SHARE UPDATE EXCLUSIVE","SHARE ROW EXCLUSIVE","ACCESS EXCLUSIVE","4 режима блокировки строк","FOR KEY SHARE","FOR NO KEY UPDATE","advisory locks","Предикатные","pg_blocking_pids()"],
     "question-92-followup-1": ["WHERE фильтрует строки до группировки","HAVING фильтрует уже сформированные группы"],
     "question-92-followup-2": ["иначе PostgreSQL выдаст ошибку","весь набор строк считается одной группой"],
     "question-92-followup-3": ["в SELECT и ORDER BY без HAVING","для фильтрации групп"],
@@ -1546,7 +1653,8 @@
       const actions = document.createElement('div');
       actions.className = 'study-export-actions';
       actions.innerHTML = '<button type="button" class="hero-btn hero-btn-primary" data-study-export="xlsx">Скачать Excel: вопросы и уточнения</button>' +
-        '<button type="button" class="hero-btn hero-btn-primary" data-study-export="json">Сохранить состояние текущих вопросов в JSON</button>';
+        '<button type="button" class="hero-btn hero-btn-primary" data-study-export="json">Сохранить состояние текущих вопросов в JSON</button>' +
+        '<p class="study-save-status" role="status" aria-live="polite"></p>';
       scope.append(actions);
       return actions;
     };

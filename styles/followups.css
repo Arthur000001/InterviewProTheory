@@ -838,6 +838,16 @@
   cursor: pointer;
 }
 
+.study-save-status {
+  flex-basis: 100%;
+  margin: 0;
+  font-size: 0.8rem;
+}
+
+.study-save-status:empty {
+  display: none;
+}
+
 @media (max-width: 900px) {
   .summary-actions.summary-actions-three {
     grid-template-columns: 1fr;

@@ -36,7 +36,7 @@ window.InterviewProQuestionCatalog = {
     'databases/querying': 2,
     'databases/redis': 12,
     'databases/scaling': 3,
-    'databases/sql': 19,
+    'databases/sql': 25,
     'golang/basics': 22,
 
     'golang/concurrency': 44,

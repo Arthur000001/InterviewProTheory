@@ -12,17 +12,17 @@ window.InterviewProContent["databases/sql"] = `<article class="question-card" id
         
         </div>
 </details>
-<div class="clarifications" aria-label="Уточнения к вопросу"><h3>Уточнения <small>(8)</small></h3>
+<div class="clarifications" aria-label="Уточнения к вопросу"><h3>Уточнения <small>(10)</small></h3>
 <div class="clarification-item" id="question-90-followup-1" data-parent-question="question-90">
 <label class="checklist-item clarification-question"><input type="checkbox"><span class="question-text">↳ Чем отличаются row-level и table-level lock?</span></label>
 <details class="answer-details"><summary>Показать ответ</summary>
-<div class="answer-box"><p style="white-space: pre-wrap;">Табличная блокировка относится ко всей таблице, построчная — к выбранным строкам. В PostgreSQL их режимы различаются; UPDATE обычно берёт блокировку таблицы на уровне команды и блокирует изменяемые строки, но не запрещает обычный SELECT благодаря MVCC.</p></div>
+<div class="answer-box"><p style="white-space: pre-wrap;">Табличная блокировка защищает отношение целиком от несовместимых операций, а блокировка строки — конкретную строку от конкурирующего изменения или захвата. Один оператор может брать оба уровня: UPDATE получает на таблицу ROW EXCLUSIVE и блокирует изменяемые строки; SELECT FOR UPDATE получает на таблицу ROW SHARE и блокирует выбранные строки. Названия табличных режимов ROW SHARE и ROW EXCLUSIVE не означают блокировку строк. Табличные режимы сравнивают с табличными режимами на той же таблице, строковые — со строковыми на той же строке; при этом строгая табличная блокировка остановит оператор ещё до захвата им строки. Обычный SELECT не ждёт построчную блокировку: MVCC позволяет прочитать доступную версию строки.</p></div>
 </details>
 </div>
 <div class="clarification-item" id="question-90-followup-2" data-parent-question="question-90">
 <label class="checklist-item clarification-question"><input type="checkbox"><span class="question-text">↳ Что такое shared/exclusive lock?</span></label>
 <details class="answer-details"><summary>Показать ответ</summary>
-<div class="answer-box"><p style="white-space: pre-wrap;">Разделяемую блокировку могут одновременно держать несколько читателей; эксклюзивная конфликтует с другими режимами, которые мешают изменению защищённого объекта. Конкретная совместимость зависит от уровня — таблица, строка или объект — и режима PostgreSQL.</p></div>
+<div class="answer-box"><p style="white-space: pre-wrap;">Shared означает, что несколько транзакций могут одновременно держать совместимые режимы на одном объекте; exclusive запрещает определённые конкурирующие режимы. Это не простое правило «все чтения совместимы, все записи нет»: например, табличный ACCESS SHARE совместим с ROW EXCLUSIVE, поэтому обычный SELECT и UPDATE идут параллельно, а SHARE конфликтует с ROW EXCLUSIVE и задержит UPDATE. Точную совместимость определяют режим и объект блокировки; матрицы восьми табличных и четырёх строковых режимов приведены ниже.</p></div>
 </details>
 </div>
 <div class="clarification-item" id="question-90-followup-3" data-parent-question="question-90">
@@ -38,15 +38,15 @@ window.InterviewProContent["databases/sql"] = `<article class="question-card" id
 </details>
 </div>
 <div class="clarification-item" id="question-90-followup-5" data-parent-question="question-90">
-<label class="checklist-item clarification-question"><input type="checkbox"><span class="question-text">↳ Что такое dirty read, non-repeatable read, phantom read?</span></label>
+<label class="checklist-item clarification-question"><input type="checkbox"><span class="question-text">↳ Что такое dirty read, non-repeatable read, phantom read и аномалия сериализации?</span></label>
 <details class="answer-details"><summary>Показать ответ</summary>
-<div class="answer-box"><p style="white-space: pre-wrap;">Dirty read — чтение неподтверждённых данных; non-repeatable read — повторное чтение той же строки с другим результатом; phantom read — изменение набора строк, удовлетворяющих предикату. PostgreSQL не допускает dirty read даже на уровне READ UNCOMMITTED, который у него ведёт себя как READ COMMITTED.</p></div>
+<div class="answer-box"><p style="white-space: pre-wrap;">Dirty read (грязное чтение): T1 изменила баланс, ещё не сделала COMMIT, T2 прочитала новое значение, после чего T1 откатилась — T2 использовала значение, которого никогда не было в зафиксированном состоянии. Non-repeatable read (неповторяемое чтение): T1 дважды читает ту же строку; между чтениями T2 меняет её и делает COMMIT, поэтому T1 видит два разных значения. Phantom read (фантом): T1 повторяет запрос по одному условию; между запросами T2 фиксирует строку, подходящую под условие, и состав результата меняется. Serialization anomaly (аномалия сериализации): успешно завершённые параллельные транзакции дают результат, которого не получить ни при одном последовательном порядке. Пример — write skew: два врача видят, что дежурят оба, и каждый снимает с дежурства себя; в итоге не дежурит никто. PostgreSQL не допускает грязных чтений даже при READ UNCOMMITTED.</p></div>
 </details>
 </div>
 <div class="clarification-item" id="question-90-followup-6" data-parent-question="question-90">
 <label class="checklist-item clarification-question"><input type="checkbox"><span class="question-text">↳ Как уровень изоляции влияет на аномалии?</span></label>
 <details class="answer-details"><summary>Показать ответ</summary>
-<div class="answer-box"><p style="white-space: pre-wrap;">Более строгий уровень ограничивает изменения, которые транзакция может наблюдать между запросами, но может увеличивать конфликты и потребность в повторе транзакций. В PostgreSQL READ COMMITTED даёт снимок на оператор, REPEATABLE READ — на транзакцию, SERIALIZABLE может завершить конфликтную транзакцию ошибкой сериализации.</p></div>
+<div class="answer-box"><p style="white-space: pre-wrap;">READ UNCOMMITTED по стандарту допускает грязное, неповторяемое и фантомное чтение; в PostgreSQL работает как READ COMMITTED, поэтому грязного чтения нет. READ COMMITTED (уровень PostgreSQL по умолчанию): каждый оператор видит свой снимок уже зафиксированных данных; два SELECT в одной транзакции могут увидеть разные значения строки и разный набор строк. REPEATABLE READ: снимок закреплён с первого запроса или изменения; повторное и фантомное чтение в PostgreSQL исключены, но возможна аномалия сериализации, например write skew. SERIALIZABLE: результат успешно завершённых транзакций должен соответствовать некоторому последовательному порядку; при опасном конфликте PostgreSQL отменяет одну транзакцию с serialization_failure, и приложение повторяет её целиком. Это гарантии видимости и допустимого результата, а не запрет на параллельное выполнение.</p></div>
 </details>
 </div>
 <div class="clarification-item" id="question-90-followup-7" data-parent-question="question-90">
@@ -61,6 +61,31 @@ window.InterviewProContent["databases/sql"] = `<article class="question-card" id
 <div class="answer-box"><p style="white-space: pre-wrap;">Держите транзакции короткими, индексируйте условия поиска обновляемых строк и захватывайте ресурсы в одном порядке. Для очередей можно применять SKIP LOCKED, для диагностики — pg_stat_activity, pg_locks и таймауты ожидания; не убирайте блокировки ценой потери корректности.</p></div>
 </details>
 </div>
+<div class="clarification-item" id="question-90-followup-9" data-parent-question="question-90">
+<label class="checklist-item clarification-question"><input type="checkbox"><span class="question-text">↳ Какие восемь табличных режимов PostgreSQL совместимы между собой?</span></label>
+<details class="answer-details"><summary>Показать ответ</summary>
+<div class="answer-box"><p>Режимы на одной таблице совместимы, если их нет в списке конфликтов ниже. Проверка относится к разным транзакциям; с собственными блокировками транзакция не конфликтует.</p>
+<ul><li><code>ACCESS SHARE</code> (обычный <code>SELECT</code>) — только с <code>ACCESS EXCLUSIVE</code>.</li>
+<li><code>ROW SHARE</code> (<code>SELECT FOR UPDATE/SHARE</code>) — с <code>EXCLUSIVE</code> и <code>ACCESS EXCLUSIVE</code>.</li>
+<li><code>ROW EXCLUSIVE</code> (<code>INSERT/UPDATE/DELETE</code>) — с <code>SHARE</code>, <code>SHARE ROW EXCLUSIVE</code>, <code>EXCLUSIVE</code>, <code>ACCESS EXCLUSIVE</code>.</li>
+<li><code>SHARE UPDATE EXCLUSIVE</code> (обычный <code>VACUUM</code>, <code>ANALYZE</code>, <code>CREATE INDEX CONCURRENTLY</code>) — с собой, <code>SHARE</code>, <code>SHARE ROW EXCLUSIVE</code>, <code>EXCLUSIVE</code>, <code>ACCESS EXCLUSIVE</code>.</li>
+<li><code>SHARE</code> (обычный <code>CREATE INDEX</code>) — с <code>ROW EXCLUSIVE</code>, <code>SHARE UPDATE EXCLUSIVE</code>, <code>SHARE ROW EXCLUSIVE</code>, <code>EXCLUSIVE</code>, <code>ACCESS EXCLUSIVE</code>.</li>
+<li><code>SHARE ROW EXCLUSIVE</code> (<code>CREATE TRIGGER</code>) — с <code>ROW EXCLUSIVE</code>, <code>SHARE UPDATE EXCLUSIVE</code>, <code>SHARE</code>, собой, <code>EXCLUSIVE</code>, <code>ACCESS EXCLUSIVE</code>.</li>
+<li><code>EXCLUSIVE</code> (<code>REFRESH MATERIALIZED VIEW CONCURRENTLY</code>) — со всеми, кроме <code>ACCESS SHARE</code>.</li>
+<li><code>ACCESS EXCLUSIVE</code> (<code>TRUNCATE</code>, <code>DROP TABLE</code>, <code>VACUUM FULL</code>) — со всеми, включая себя; это единственный режим, блокирующий обычный <code>SELECT</code>.</li></ul></div>
+</details>
+</div>
+<div class="clarification-item" id="question-90-followup-10" data-parent-question="question-90">
+<label class="checklist-item clarification-question"><input type="checkbox"><span class="question-text">↳ Как совместимы четыре режима блокировки строк PostgreSQL?</span></label>
+<details class="answer-details"><summary>Показать ответ</summary>
+<div class="answer-box"><p>Конфликтуют только блокировки одной и той же строки, взятые разными транзакциями; для разных строк они совместимы.</p>
+<ul><li><code>FOR KEY SHARE</code> конфликтует только с <code>FOR UPDATE</code>. Он защищает ключ от удаления или изменения, но допускает обновление неключевых полей.</li>
+<li><code>FOR SHARE</code> конфликтует с <code>FOR NO KEY UPDATE</code> и <code>FOR UPDATE</code>; несколько транзакций могут держать <code>FOR SHARE</code> одновременно.</li>
+<li><code>FOR NO KEY UPDATE</code> конфликтует с собой, <code>FOR SHARE</code> и <code>FOR UPDATE</code>, но совместим с <code>FOR KEY SHARE</code>. Его обычно берёт <code>UPDATE</code> без изменения ключевых столбцов.</li>
+<li><code>FOR UPDATE</code> конфликтует со всеми четырьмя режимами, включая себя; его берёт <code>DELETE</code> и <code>UPDATE</code> ключевых столбцов.</li></ul>
+<p>Обычный <code>SELECT</code> не запрашивает строковую блокировку и не ждёт её. <code>SELECT ... FOR UPDATE</code> или другие <code>FOR ...</code> сначала получают совместимую блокировку таблицы, затем выбранных строк.</p></div>
+</details>
+</div>
 </div>
 </article>
 <article class="question-card" id="question-91">
@@ -69,18 +94,18 @@ window.InterviewProContent["databases/sql"] = `<article class="question-card" id
 <div class="answer-box">
           
           <p style="margin: 6px 0; color: var(--text-secondary); line-height: 1.65;">Расскажи кратко о каждой аномалии: Dirty Read, Non-repeatable Read, Phantom Read, Serialization Anomaly.</p>
-          <div class="complete-answer"><p>Грязное чтение видит ещё не зафиксированные данные; неповторяемое чтение получает разные значения одной строки в рамках транзакции; фантомное чтение меняет набор строк по одному предикату. Возможны также lost update, write skew и аномалии сериализации. Какие аномалии допустимы, зависит от уровня изоляции и конкретной СУБД. В PostgreSQL MVCC и Serializable Snapshot Isolation устраняют часть конфликтов ценой возможных ошибок сериализации, которые приложение должно повторять.</p></div>
+          <div class="complete-answer"><p>Грязное чтение видит данные, которые другая транзакция ещё может откатить. Неповторяемое чтение даёт разные значения одной строки при двух чтениях внутри транзакции. Фантомное чтение меняет состав строк при повторе запроса с тем же условием. Аномалия сериализации означает, что итог нескольких зафиксированных транзакций нельзя получить при их последовательном выполнении; пример — write skew, когда две транзакции принимают решение по одному снимку и изменяют разные строки, нарушая общее правило. Возможен также lost update — потеря изменения при перезаписи результата другой транзакции. Допустимость аномалий зависит от уровня изоляции и СУБД; в PostgreSQL SERIALIZABLE отменяет опасную транзакцию с ошибкой, после которой её нужно повторить целиком.</p></div>
 
   
   
         
         </div>
 </details>
-<div class="clarifications" aria-label="Уточнения к вопросу"><h3>Уточнения <small>(4)</small></h3>
+<div class="clarifications" aria-label="Уточнения к вопросу"><h3>Уточнения <small>(8)</small></h3>
 <div class="clarification-item" id="question-91-followup-1" data-parent-question="question-91">
 <label class="checklist-item clarification-question"><input type="checkbox"><span class="question-text">↳ Что такое ACID?</span></label>
 <details class="answer-details"><summary>Показать ответ</summary>
-<div class="answer-box"><p style="white-space: pre-wrap;">ACID означает атомарность, согласованность, изоляцию и долговечность транзакций. Это свойства выполнения изменений: либо весь набор фиксируется, либо откатывается; ограничения сохраняются; конкурентные операции изолируются согласно уровню; зафиксированное переживает сбой в рамках гарантий БД.</p></div>
+<div class="answer-box"><p style="white-space: pre-wrap;">ACID — четыре разных свойства транзакции. Atomicity: все её изменения фиксируются вместе или вместе откатываются. Consistency: транзакция переводит данные из одного допустимого состояния в другое, если её логика и ограничения корректны. Isolation: результат параллельной работы ограничен выбранным уровнем изоляции. Durability: подтверждённый COMMIT сохраняется после сбоя в пределах настроенных гарантий БД. Ниже каждое свойство разобрано отдельно на примере перевода денег.</p></div>
 </details>
 </div>
 <div class="clarification-item" id="question-91-followup-2" data-parent-question="question-91">
@@ -99,6 +124,30 @@ window.InterviewProContent["databases/sql"] = `<article class="question-card" id
 <label class="checklist-item clarification-question"><input type="checkbox"><span class="question-text">↳ Что произойдёт, если в середине транзакции произойдёт ошибка?</span></label>
 <details class="answer-details"><summary>Показать ответ</summary>
 <div class="answer-box"><p style="white-space: pre-wrap;">После ошибки SQL в транзакции PostgreSQL помечает её как прерванную: следующие команды отклоняются до ROLLBACK. Если заранее создан SAVEPOINT, можно выполнить ROLLBACK TO SAVEPOINT и продолжить транзакцию.</p></div>
+</details>
+</div>
+<div class="clarification-item" id="question-91-followup-5" data-parent-question="question-91">
+<label class="checklist-item clarification-question"><input type="checkbox"><span class="question-text">↳ Что гарантирует Atomicity (атомарность) в ACID?</span></label>
+<details class="answer-details"><summary>Показать ответ</summary>
+<div class="answer-box"><p>Если перевод состоит из списания 100 с одного счёта и зачисления 100 на другой, после <code>COMMIT</code> сохраняются оба изменения. При <code>ROLLBACK</code>, ошибке или сбое до фиксации не сохраняется ни одно из них. Атомарность относится к изменениям в рамках транзакции БД; отправленное письмо или внешний платёж она сама не откатывает.</p></div>
+</details>
+</div>
+<div class="clarification-item" id="question-91-followup-6" data-parent-question="question-91">
+<label class="checklist-item clarification-question"><input type="checkbox"><span class="question-text">↳ Что означает Consistency (согласованность) в ACID?</span></label>
+<details class="answer-details"><summary>Показать ответ</summary>
+<div class="answer-box"><p>Транзакция должна сохранять инварианты данных: например, перевод не должен создавать отрицательный остаток, если это запрещено правилом, и должен сохранить общую сумму двух счетов. PostgreSQL проверяет объявленные <code>CHECK</code>, <code>UNIQUE</code> и внешние ключи, но бизнес-правило, не выраженное ограничением или корректной логикой транзакции, сама СУБД не угадает. Допустимое состояние до транзакции должно остаться допустимым после её фиксации.</p></div>
+</details>
+</div>
+<div class="clarification-item" id="question-91-followup-7" data-parent-question="question-91">
+<label class="checklist-item clarification-question"><input type="checkbox"><span class="question-text">↳ Что означает Isolation (изоляция) в ACID?</span></label>
+<details class="answer-details"><summary>Показать ответ</summary>
+<div class="answer-box"><p>Одновременные транзакции не должны мешать друг другу сверх того, что допускает выбранный уровень изоляции. При <code>READ COMMITTED</code> повторный <code>SELECT</code> остатка счёта может увидеть новое зафиксированное значение после чужого <code>COMMIT</code>; при <code>REPEATABLE READ</code> снимок остаётся стабильным, но возможен <em>write skew</em>. Только <code>SERIALIZABLE</code> требует, чтобы итог успешно завершённых транзакций соответствовал некоторому последовательному выполнению; конфликт может завершиться ошибкой и потребовать повтора всей транзакции. Изоляция не означает физического выполнения транзакций по одной.</p></div>
+</details>
+</div>
+<div class="clarification-item" id="question-91-followup-8" data-parent-question="question-91">
+<label class="checklist-item clarification-question"><input type="checkbox"><span class="question-text">↳ Что гарантирует Durability (долговечность) в ACID?</span></label>
+<details class="answer-details"><summary>Показать ответ</summary>
+<div class="answer-box"><p>После подтверждённого <code>COMMIT</code> перевод должен сохраниться при перезапуске БД: PostgreSQL восстанавливает зафиксированные изменения по журналу WAL. Граница гарантии зависит от настроек фиксации и хранения: например, отключение <code>fsync</code> или асинхронная фиксация ослабляют её при аварии. Долговечность одной БД не означает, что изменение уже попало на асинхронную реплику или во внешнюю систему.</p></div>
 </details>
 </div>
 </div>

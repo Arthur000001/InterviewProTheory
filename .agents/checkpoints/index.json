@@ -1,8 +1,71 @@
 {
   "schema_version": 1,
-  "latest_id": "2026-10-04-task6-rename-profile",
+  "latest_id": "2026-10-05-json-picker-iframe",
   "time_note": "В исходных точках часы не записаны; null означает неизвестное время, не 00:00.",
   "entries": [
+    {
+      "id": "2026-10-05-json-picker-iframe",
+      "date": "2026-10-05",
+      "time": "12:58:03+04:00",
+      "title": "Диагностика загрузки JSON во встроенном предпросмотре",
+      "report": "reports/2026-10-05_json_picker_iframe.md",
+      "state": "diagnosed_ui_fix_unverified",
+      "failed_attempts": 0
+    },
+    {
+      "id": "2026-10-05-pause-after-locks",
+      "date": "2026-10-05",
+      "time": "12:48:45+04:00",
+      "title": "Пауза после вопросов 280, 281 и 288",
+      "report": "reports/2026-10-05_pause_after_locks.md",
+      "state": "paused_by_user",
+      "failed_attempts": 0
+    },
+    {
+      "id": "2026-10-05-postgresql-lock-types",
+      "date": "2026-10-05",
+      "time": "12:24:33+04:00",
+      "title": "Полный список блокировок PostgreSQL в вопросе 288",
+      "report": "reports/2026-10-05_postgresql_lock_types.md",
+      "state": "applied_structurally_verified",
+      "failed_attempts": 0
+    },
+    {
+      "id": "2026-10-05-transaction-clarifications",
+      "date": "2026-10-05",
+      "time": "11:58:45+04:00",
+      "title": "Уточнения о блокировках, изоляции, аномалиях и ACID",
+      "report": "reports/2026-10-05_transaction_clarifications.md",
+      "state": "applied_structurally_verified",
+      "failed_attempts": 1
+    },
+    {
+      "id": "2026-10-04-pause-after-task6",
+      "date": "2026-10-04",
+      "time": "23:58:42+04:00",
+      "title": "Пауза после Task 6",
+      "report": "reports/2026-10-04_pause_after_task6.md",
+      "state": "paused_by_user",
+      "failed_attempts": 0
+    },
+    {
+      "id": "2026-10-04-task6-topic-json",
+      "date": "2026-10-04",
+      "time": null,
+      "title": "Task 6: JSON вопросов по темам",
+      "report": "reports/2026-10-04_task6_topic_json.md",
+      "state": "applied_unverified",
+      "failed_attempts": 1
+    },
+    {
+      "id": "2026-10-04-task6-save-diagnostic",
+      "date": "2026-10-04",
+      "time": null,
+      "title": "Task 6: диагностика записи JSON",
+      "report": "reports/2026-10-04_task6_save_diagnostic.md",
+      "state": "applied_unverified",
+      "failed_attempts": 2
+    },
     {
       "id": "2026-10-04-task6-rename-profile",
       "date": "2026-10-04",
